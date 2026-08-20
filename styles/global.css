@@ -43,6 +43,57 @@ body {
   transition: background-color 2s ease;
 }
 
+/* Animated multi-nebula glowing backdrops with silky GPU drift */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 12% 18%, rgba(227,184,234,0.08), transparent 65%),
+    radial-gradient(ellipse 48% 40% at 85% 15%, rgba(184,195,255,0.07), transparent 60%),
+    radial-gradient(ellipse 50% 45% at 50% 85%, rgba(194,194,242,0.06), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 75% 65%, rgba(255,184,215,0.05), transparent 55%),
+    radial-gradient(ellipse 35% 30% at 25% 70%, rgba(184,230,255,0.05), transparent 55%);
+  animation: nebula-drift 35s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes nebula-drift {
+  0% { opacity: 0.75; transform: scale3d(1, 1, 1) translate3d(0, 0, 0); }
+  33% { opacity: 1; transform: scale3d(1.06, 1.06, 1) translate3d(1.5%, -1.2%, 0); }
+  66% { opacity: 0.85; transform: scale3d(1.03, 1.03, 1) translate3d(-1.2%, 1%, 0); }
+  100% { opacity: 0.95; transform: scale3d(1.08, 1.08, 1) translate3d(0.8%, -0.6%, 0); }
+}
+
+/* Page entrance animation */
+#root {
+  animation: page-enter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes page-enter {
+  0% { opacity: 0; transform: scale(0.98); filter: blur(4px); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+/* ── Scroll Progress Bar ── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  z-index: 1000;
+  background: linear-gradient(90deg, var(--secondary), var(--primary), var(--tertiary), var(--accent-warm));
+  background-size: 300% 100%;
+  animation: progress-shimmer 3s linear infinite;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 12px rgba(227,184,234,0.6), 0 0 24px rgba(194,194,242,0.3);
+  border-radius: 0 2px 2px 0;
+}
+@keyframes progress-shimmer {
+  0% { background-position: 0% 0; }
+  100% { background-position: 300% 0; }
+}
+
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
@@ -59,7 +110,7 @@ body {
 
 .bg-canvas-layer { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 #starsCanvas { z-index: 0; }
-#auroraCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 50vh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
+#auroraCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 58vh; z-index: 0; pointer-events: none; mix-blend-mode: screen; }
 #skyCanvas { z-index: 1; }
 
 .bg-overlay {
@@ -68,7 +119,7 @@ body {
 }
 #vignetteOverlay {
   position: fixed; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 20%, rgba(0,0,0,0.75) 100%);
+  background: radial-gradient(ellipse 75% 65% at 50% 50%, transparent 25%, rgba(4,3,8,0.78) 100%);
   opacity: 0; transition: opacity 4s ease;
 }
 
@@ -76,14 +127,18 @@ body {
 .firefly {
   position: absolute; border-radius: 50%; will-change: transform, opacity;
   background: radial-gradient(circle, rgba(255,244,196,0.95) 0%, rgba(255,214,140,0.55) 45%, transparent 75%);
-  filter: blur(0.4px); animation-name: firefly-drift, firefly-glow;
-  animation-timing-function: ease-in-out, ease-in-out; animation-iteration-count: infinite, infinite;
+  filter: blur(0.3px); animation-name: firefly-drift, firefly-glow;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1), ease-in-out;
+  animation-iteration-count: infinite, infinite;
 }
-@keyframes firefly-glow { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.95; } }
+@keyframes firefly-glow { 0%, 100% { opacity: 0.15; transform: scale(0.85); } 50% { opacity: 0.95; transform: scale(1.15); } }
 @keyframes firefly-drift {
-  0% { transform: translate(0,0); } 20% { transform: translate(var(--fx1), var(--fy1)); }
-  40% { transform: translate(var(--fx2), var(--fy2)); } 60% { transform: translate(var(--fx3), var(--fy3)); }
-  80% { transform: translate(var(--fx4), var(--fy4)); } 100% { transform: translate(0,0); }
+  0% { transform: translate3d(0,0,0); }
+  20% { transform: translate3d(var(--fx1), var(--fy1), 0); }
+  40% { transform: translate3d(var(--fx2), var(--fy2), 0); }
+  60% { transform: translate3d(var(--fx3), var(--fy3), 0); }
+  80% { transform: translate3d(var(--fx4), var(--fy4), 0); }
+  100% { transform: translate3d(0,0,0); }
 }
 .stardust {
   position: absolute; border-radius: 50%; background: rgba(241,238,247,0.55);
@@ -91,8 +146,25 @@ body {
   animation-timing-function: linear, ease-in-out; animation-iteration-count: infinite, infinite;
   animation-direction: alternate, normal;
 }
-@keyframes dust-float { 0% { transform: translate(0,0); } 100% { transform: translate(var(--dx), var(--dy)); } }
-@keyframes dust-twinkle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.65; } }
+@keyframes dust-float { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(var(--dx), var(--dy), 0); } }
+@keyframes dust-twinkle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.75; } }
+
+.crystal-sparkle {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(227,184,234,0.4), rgba(184,195,255,0.3));
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  animation-name: crystal-spin, dust-twinkle;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 0 4px rgba(227,184,234,0.7)) drop-shadow(0 0 8px rgba(194,194,242,0.3));
+}
+@keyframes crystal-spin {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(0.9); }
+}
 
 section, footer, nav { position: relative; z-index: 3; }
 
