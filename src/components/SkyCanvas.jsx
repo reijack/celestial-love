@@ -282,6 +282,13 @@ export default function SkyCanvas() {
     }
     window.addEventListener('celestial:meteor_shower', handleMeteorShower)
 
+    // Track mouse position for parallax + aura glow effects
+    function handleMouseMove(e) {
+      targetMouseX = e.clientX
+      targetMouseY = e.clientY
+      targetRawX = e.clientX
+      targetRawY = e.clientY
+    }
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     function drawRipples() {
