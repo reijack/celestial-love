@@ -1,112 +1,252 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import QRCode from 'qrcode'
+import { spawnHearts } from '../hooks'
 
 export default function QRLove() {
   const [open, setOpen] = useState(false)
   const canvasRef = useRef(null)
   const [ready, setReady] = useState(false)
+  const [copied, setCopied] = useState(false)
   const url = typeof window !== 'undefined' ? window.location.href : ''
 
   const draw = useCallback(async () => {
     if (!canvasRef.current) return
     setReady(false)
-    const size = 260
-    const off = document.createElement('canvas')
-    off.width = size
-    off.height = size
-    // QR module dengan warna ungu-pink lembut biar nyatu sama tema, background transparan-gelap
-    await QRCode.toCanvas(off, url || 'https://example.com', {
-      width: size,
-      margin: 1,
-      color: { dark: '#2a1f33', light: '#f1eef7' },
-      errorCorrectionLevel: 'H',
-    })
 
-    const ctx = canvasRef.current.getContext('2d')
-    const W = 320
-    canvasRef.current.width = W
-    canvasRef.current.height = W
+    const W = 360
+    const H = 360
+    const canvas = canvasRef.current
+    canvas.width = W
+    canvas.height = H
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, W, H)
 
-    // Kartu bulat lembut di belakang
-    ctx.clearRect(0, 0, W, W)
-    const grad = ctx.createLinearGradient(0, 0, W, W)
-    grad.addColorStop(0, '#e3b8ea')
-    grad.addColorStop(1, '#c2c2f2')
+    const cx = W / 2
+    const cy = H / 2 - 4
+
+    // 1. Draw Outer Heart Glow Card
     ctx.save()
-    roundRect(ctx, 8, 8, W - 16, W - 16, 28)
-    ctx.fillStyle = grad
+    ctx.shadowColor = 'rgba(227, 184, 234, 0.45)'
+    ctx.shadowBlur = 24
+    drawSmoothHeart(ctx, cx, cy, 330, 310)
+    const outerGrad = ctx.createLinearGradient(cx - 150, cy - 150, cx + 150, cy + 150)
+    outerGrad.addColorStop(0, '#f9e2fb')
+    outerGrad.addColorStop(0.5, '#e3b8ea')
+    outerGrad.addColorStop(1, '#c2c2f2')
+    ctx.fillStyle = outerGrad
     ctx.fill()
     ctx.restore()
 
-    // Panel putih untuk QR
-    const pad = 26
+    // 2. Draw Inner Cream Heart Base for QR
     ctx.save()
-    roundRect(ctx, pad, pad, W - pad * 2, W - pad * 2, 20)
-    ctx.fillStyle = '#f1eef7'
+    drawSmoothHeart(ctx, cx, cy, 296, 276)
+    ctx.fillStyle = '#f8f5fd'
     ctx.fill()
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'
+    ctx.stroke()
     ctx.restore()
 
-    // Gambar QR di tengah panel
-    const qrSize = W - pad * 2 - 24
-    ctx.drawImage(off, (W - qrSize) / 2, (W - qrSize) / 2, qrSize, qrSize)
+    // 3. Generate QR Code Matrix
+    const targetUrl = url || 'https://example.com'
+    const qr = QRCode.create(targetUrl, { errorCorrectionLevel: 'H' })
+    const modCount = qr.modules.size
 
-    // Heart badge kecil di tengah QR (dengan finder-pattern aman karena errorCorrectionLevel H)
-    const cx = W / 2, cy = W / 2, hs = 15
+    const qrSize = 196
+    const cellSize = qrSize / modCount
+    const qrLeft = cx - qrSize / 2
+    const qrTop = cy - qrSize / 2 + 10
+
+    // Clip to heart area so the QR takes the shape of the heart
     ctx.save()
-    ctx.beginPath()
-    roundRect(ctx, cx - hs - 4, cy - hs - 4, hs * 2 + 8, hs * 2 + 8, 10)
-    ctx.fillStyle = '#f1eef7'
-    ctx.fill()
-    drawHeart(ctx, cx, cy, hs, '#e3b8ea')
+    drawSmoothHeart(ctx, cx, cy, 282, 262)
+    ctx.clip()
+
+    // Draw QR Modules as smooth rounded dots
+    const darkColor = '#231834'
+    const darkLighter = '#422858'
+
+    for (let r = 0; r < modCount; r++) {
+      for (let c = 0; c < modCount; c++) {
+        if (qr.modules.get(r, c)) {
+          const x = qrLeft + c * cellSize
+          const y = qrTop + r * cellSize
+
+          // Check if module is part of the 3 main finder patterns
+          const isFinder =
+            (r < 7 && c < 7) ||
+            (r < 7 && c >= modCount - 7) ||
+            (r >= modCount - 7 && c < 7)
+
+          // Center heart badge area
+          const centerDist = Math.hypot(
+            (c - modCount / 2) * cellSize,
+            (r - modCount / 2) * cellSize
+          )
+          if (centerDist < 20) continue // leave room for center heart badge
+
+          ctx.fillStyle = isFinder ? darkColor : darkLighter
+
+          if (isFinder) {
+            // Rounded square for finder pattern modules
+            roundRect(ctx, x + 0.3, y + 0.3, cellSize - 0.6, cellSize - 0.6, cellSize * 0.3)
+            ctx.fill()
+          } else {
+            // Smooth circular dots for cute look
+            ctx.beginPath()
+            ctx.arc(x + cellSize / 2, y + cellSize / 2, cellSize * 0.46, 0, Math.PI * 2)
+            ctx.fill()
+          }
+        }
+      }
+    }
     ctx.restore()
+
+    // 4. Center Glowing Heart Badge
+    ctx.save()
+    const badgeSize = 34
+    const badgeY = cy + 10
+    ctx.shadowColor = 'rgba(227, 184, 234, 0.8)'
+    ctx.shadowBlur = 10
+    drawSmoothHeart(ctx, cx, badgeY, badgeSize + 8, badgeSize + 8)
+    ctx.fillStyle = '#f8f5fd'
+    ctx.fill()
+    ctx.lineWidth = 1.5
+    ctx.strokeStyle = '#e3b8ea'
+    ctx.stroke()
+    ctx.restore()
+
+    // Mini heart inside badge
+    ctx.save()
+    drawSmoothHeart(ctx, cx, badgeY, badgeSize - 6, badgeSize - 6)
+    const badgeGrad = ctx.createLinearGradient(cx - 15, badgeY - 15, cx + 15, badgeY + 15)
+    badgeGrad.addColorStop(0, '#e3b8ea')
+    badgeGrad.addColorStop(1, '#c2c2f2')
+    ctx.fillStyle = badgeGrad
+    ctx.fill()
+
+    // Star icon inside badge
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '10px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('✦', cx, badgeY + 1)
+    ctx.restore()
+
+    // 5. Decorative Celestial Sparkles on the Heart Contour
+    drawSparkleIcon(ctx, cx - 110, cy - 85, 9, '#ffffff')
+    drawSparkleIcon(ctx, cx + 110, cy - 85, 9, '#ffffff')
+    drawSparkleIcon(ctx, cx, cy - 132, 7, '#ffffff')
+    drawSparkleIcon(ctx, cx, cy + 138, 6, '#ffffff')
 
     setReady(true)
   }, [url])
 
-  useEffect(() => { if (open) draw() }, [open, draw])
+  useEffect(() => {
+    if (open) draw()
+  }, [open, draw])
 
   function download() {
     if (!canvasRef.current) return
     const link = document.createElement('a')
-    link.download = 'celestial-love-qr.png'
+    link.download = 'celestial-love-heart-qr.png'
     link.href = canvasRef.current.toDataURL('image/png')
     link.click()
+  }
+
+  function copyUrl(e) {
+    if (url) {
+      navigator.clipboard?.writeText(url)
+      setCopied(true)
+      spawnHearts(e.clientX, e.clientY)
+      setTimeout(() => setCopied(false), 2200)
+    }
   }
 
   return (
     <>
       <button
-        className="qr-love-btn"
-        title="QR Code"
+        className="qr-love-btn floating-element"
+        title="Buka QR Love ✦"
         onClick={() => setOpen(true)}
       >
-        <span className="material-symbols-outlined">qr_code_2</span>
+        <span className="material-symbols-outlined filled" style={{ color: 'var(--secondary)', fontSize: '1.6rem' }}>
+          favorite
+        </span>
       </button>
 
-      <div className={`sw-modal-backdrop ${open ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
+      <div
+        className={`sw-modal-backdrop ${open ? 'open' : ''}`}
+        onClick={(e) => e.target === e.currentTarget && setOpen(false)}
+      >
         <div className="sw-modal qr-love-modal">
           <button className="sw-modal-close" onClick={() => setOpen(false)}>
-            <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>close</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>
+              close
+            </span>
           </button>
+
           <div className="sw-modal-star">
-            <span className="material-symbols-outlined filled" style={{ fontSize: '1.75rem', color: 'var(--secondary)' }}>favorite</span>
+            <span
+              className="material-symbols-outlined filled heartbeat"
+              style={{ fontSize: '2.2rem', color: 'var(--error)' }}
+            >
+              favorite
+            </span>
           </div>
-          <h3>Scan With Love</h3>
-          <p>Arahkan kamera ke kode ini untuk membuka kembali langit cerita kita, kapan saja.</p>
+
+          <h3 className="gradient-text">Heart-Shaped Love QR</h3>
+          <p>Scan kode berbentuk hati ini dengan kamera ponsel untuk membuka semesta cinta kita kapan saja ✦</p>
+
           <div className="qr-love-canvas-wrap">
-            <canvas ref={canvasRef} style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.3s' }} />
+            <canvas
+              ref={canvasRef}
+              style={{
+                opacity: ready ? 1 : 0,
+                transition: 'opacity 0.3s',
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
           </div>
-          <div className="sw-modal-actions">
-            <button className="sw-btn-cancel" onClick={() => setOpen(false)}>Tutup</button>
+
+          <div className="sw-modal-actions" style={{ flexWrap: 'wrap', gap: '0.6rem' }}>
+            <button className="sw-btn-cancel" onClick={copyUrl}>
+              <span className="material-symbols-outlined" style={{ fontSize: '0.95rem' }}>
+                {copied ? 'check' : 'link'}
+              </span>
+              <span>{copied ? 'Link Tersalin ✦' : 'Salin Tautan'}</span>
+            </button>
             <button className="sw-btn-save" onClick={download} disabled={!ready}>
-              <span className="material-symbols-outlined filled" style={{ fontSize: '0.9375rem' }}>download</span>
-              Simpan Gambar
+              <span className="material-symbols-outlined filled" style={{ fontSize: '0.95rem' }}>
+                download
+              </span>
+              <span>Unduh Heart QR</span>
             </button>
           </div>
         </div>
       </div>
     </>
   )
+}
+
+// Smooth Parametric Bezier Heart Shape
+function drawSmoothHeart(ctx, cx, cy, width, height) {
+  ctx.beginPath()
+  const topY = cy - height * 0.46
+  const bottomY = cy + height * 0.48
+  const leftX = cx - width * 0.5
+  const rightX = cx + width * 0.5
+  const midTopY = cy - height * 0.16
+
+  ctx.moveTo(cx, midTopY)
+  // Left lobe
+  ctx.bezierCurveTo(cx - width * 0.08, topY, leftX, topY, leftX, cy - height * 0.05)
+  ctx.bezierCurveTo(leftX, cy + height * 0.22, cx - width * 0.18, cy + height * 0.35, cx, bottomY)
+  // Right lobe
+  ctx.bezierCurveTo(cx + width * 0.18, cy + height * 0.35, rightX, cy + height * 0.22, rightX, cy - height * 0.05)
+  ctx.bezierCurveTo(rightX, topY, cx + width * 0.08, topY, cx, midTopY)
+  ctx.closePath()
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -119,20 +259,30 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
-function drawHeart(ctx, cx, cy, size, color) {
+function drawSparkleIcon(ctx, x, y, size, fill) {
   ctx.save()
-  ctx.translate(cx, cy - size * 0.15)
-  ctx.scale(size / 10, size / 10)
+  ctx.translate(x, y)
+  ctx.fillStyle = fill
+  ctx.shadowColor = 'rgba(255, 255, 255, 0.9)'
+  ctx.shadowBlur = 6
   ctx.beginPath()
-  ctx.moveTo(0, 3)
-  ctx.bezierCurveTo(0, 1, -2, -3, -6, -3)
-  ctx.bezierCurveTo(-11, -3, -11, 3.5, -11, 3.5)
-  ctx.bezierCurveTo(-11, 7, -7, 10.5, 0, 15)
-  ctx.bezierCurveTo(7, 10.5, 11, 7, 11, 3.5)
-  ctx.bezierCurveTo(11, 3.5, 11, -3, 6, -3)
-  ctx.bezierCurveTo(2, -3, 0, 1, 0, 3)
+  for (let i = 0; i < 4; i++) {
+    const ang = (Math.PI / 2) * i
+    ctx.moveTo(0, 0)
+    ctx.quadraticCurveTo(
+      Math.cos(ang + 0.45) * size * 0.35,
+      Math.sin(ang + 0.45) * size * 0.35,
+      Math.cos(ang) * size,
+      Math.sin(ang) * size
+    )
+    ctx.quadraticCurveTo(
+      Math.cos(ang - 0.45) * size * 0.35,
+      Math.sin(ang - 0.45) * size * 0.35,
+      0,
+      0
+    )
+  }
   ctx.closePath()
-  ctx.fillStyle = color
   ctx.fill()
   ctx.restore()
 }
