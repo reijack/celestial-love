@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { HERO_IMG, CARD_CAT_IMG_1, CARD_CAT_IMG_2, CARD_CAT_IMG_3 } from '../content'
 import { spawnHearts } from '../hooks'
+import { playStarChime, playHeartPop } from '../sound'
 
 const RANDOM_LOVE_NOTES = [
   'Kamu adalah orang pertama yang kupikirkan saat membuka mata dan yang terakhir sebelum terlelap.',
@@ -16,11 +17,13 @@ const RANDOM_LOVE_NOTES = [
 export default function Reasons() {
   const [noteModal, setNoteModal] = useState(false)
   const [currentNote, setCurrentNote] = useState('')
+  const [cardLikes, setCardLikes] = useState({ 1: 24, 2: 18, 3: 15, 4: 21, 5: 32, 6: 28 })
 
   function handleRandomNote(e) {
     const random = RANDOM_LOVE_NOTES[Math.floor(Math.random() * RANDOM_LOVE_NOTES.length)]
     setCurrentNote(random)
     setNoteModal(true)
+    playStarChime()
     spawnHearts(e.clientX, e.clientY)
   }
 
@@ -30,6 +33,14 @@ export default function Reasons() {
       next = RANDOM_LOVE_NOTES[Math.floor(Math.random() * RANDOM_LOVE_NOTES.length)]
     }
     setCurrentNote(next)
+    playStarChime()
+    spawnHearts(e.clientX, e.clientY)
+  }
+
+  function likeBento(id, e) {
+    e.stopPropagation()
+    setCardLikes((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }))
+    playHeartPop()
     spawnHearts(e.clientX, e.clientY)
   }
 
@@ -78,7 +89,10 @@ export default function Reasons() {
               gap: '0.5rem',
               transition: 'all 0.25s ease',
             }}
-            onClick={(e) => spawnHearts(e.clientX, e.clientY)}
+            onClick={(e) => {
+              playHeartPop()
+              spawnHearts(e.clientX, e.clientY)
+            }}
           >
             <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>favorite</span>
             <span>Kirim Cinta ✦</span>
@@ -103,7 +117,8 @@ export default function Reasons() {
             {/* Bento 1: Zodiac Connection */}
             <div
               className="glass-card constellation-bg reveal bento-span-2"
-              style={{ borderRadius: '1.5rem', padding: '2.25rem', position: 'relative', overflow: 'visible' }}
+              style={{ borderRadius: '1.5rem', padding: '2.25rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
+              onClick={(e) => likeBento(1, e)}
             >
               <img
                 className="card-cat-peek"
@@ -113,13 +128,19 @@ export default function Reasons() {
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right,rgba(227,184,234,0.1),rgba(194,194,242,0.03))', borderRadius: '1.5rem', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                  <div className="reason-icon reason-icon-secondary" style={{ width: '3rem', height: '3rem', marginBottom: 0 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>air</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div className="reason-icon reason-icon-secondary" style={{ width: '3rem', height: '3rem', marginBottom: 0 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>air</span>
+                    </div>
+                    <div className="reason-icon reason-icon-primary" style={{ width: '3rem', height: '3rem', marginBottom: 0 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>water_drop</span>
+                    </div>
                   </div>
-                  <div className="reason-icon reason-icon-primary" style={{ width: '3rem', height: '3rem', marginBottom: 0 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>water_drop</span>
-                  </div>
+                  <span className="bento-like-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                    <span>{cardLikes[1]}</span>
+                  </span>
                 </div>
                 <div>
                   <h3 className="reason-card-title" style={{ color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -135,12 +156,19 @@ export default function Reasons() {
             {/* Bento 2: Late Night Talks */}
             <div
               className="glass-card constellation-bg reveal reveal-delay-1"
-              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden' }}
+              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+              onClick={(e) => likeBento(2, e)}
             >
               <div style={{ position: 'absolute', top: 0, right: 0, width: '16rem', height: '16rem', background: 'rgba(194,194,242,0.1)', borderRadius: '9999px', filter: 'blur(3rem)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-                <div className="reason-icon reason-icon-primary">
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>dark_mode</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <div className="reason-icon reason-icon-primary" style={{ marginBottom: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>dark_mode</span>
+                  </div>
+                  <span className="bento-like-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                    <span>{cardLikes[2]}</span>
+                  </span>
                 </div>
                 <div>
                   <h3 className="reason-card-title">Obrolan Tengah Malam</h3>
@@ -154,7 +182,8 @@ export default function Reasons() {
             {/* Bento 3: Morning Rituals */}
             <div
               className="glass-card constellation-bg reveal reveal-delay-2"
-              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible' }}
+              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
+              onClick={(e) => likeBento(3, e)}
             >
               <img
                 className="card-cat-peek"
@@ -163,8 +192,14 @@ export default function Reasons() {
                 style={{ top: '-1.5rem', left: '-1rem', width: '3.75rem', height: '3.75rem', borderWidth: '2px', transform: 'rotate(-10deg)' }}
               />
               <div style={{ position: 'relative', zIndex: 10 }}>
-                <div className="reason-icon reason-icon-secondary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: '1rem' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>coffee</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <div className="reason-icon reason-icon-secondary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>coffee</span>
+                  </div>
+                  <span className="bento-like-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                    <span>{cardLikes[3]}</span>
+                  </span>
                 </div>
                 <h3 className="reason-card-title-sm">Perhatian Kecil Sehari-Hari</h3>
                 <p className="reason-card-text-sm">
@@ -176,11 +211,18 @@ export default function Reasons() {
             {/* Bento 4: Shared Playlist */}
             <div
               className="glass-card constellation-bg reveal reveal-delay-3"
-              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden' }}
+              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+              onClick={(e) => likeBento(4, e)}
             >
               <div style={{ position: 'relative', zIndex: 10 }}>
-                <div className="reason-icon reason-icon-tertiary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: '1rem' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>music_note</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <div className="reason-icon reason-icon-tertiary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>music_note</span>
+                  </div>
+                  <span className="bento-like-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                    <span>{cardLikes[4]}</span>
+                  </span>
                 </div>
                 <h3 className="reason-card-title-sm">Lagu &amp; Melodi Kita</h3>
                 <p className="reason-card-text-sm">
@@ -192,7 +234,8 @@ export default function Reasons() {
             {/* Bento 5: Your Laugh */}
             <div
               className="glass-card constellation-bg reveal reveal-delay-1"
-              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer' }}
+              onClick={(e) => likeBento(5, e)}
             >
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right,transparent,rgba(194,194,242,0.06))', borderRadius: '1.5rem', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -224,7 +267,8 @@ export default function Reasons() {
             {/* Bento 6: Spontaneous Adventures */}
             <div
               className="glass-card constellation-bg reveal reveal-delay-2 bento-span-2"
-              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible' }}
+              style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
+              onClick={(e) => likeBento(6, e)}
             >
               <img
                 className="card-cat-peek"
@@ -234,11 +278,17 @@ export default function Reasons() {
               />
               <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(to right,var(--secondary),var(--primary),transparent)', opacity: 0.4, borderRadius: '1.5rem 1.5rem 0 0' }} />
               <div style={{ position: 'relative', zIndex: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                  <div className="reason-icon reason-icon-bright" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>flight_takeoff</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div className="reason-icon reason-icon-bright" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>flight_takeoff</span>
+                    </div>
+                    <h3 className="reason-card-title-sm" style={{ marginBottom: 0 }}>Petualangan Tak Terduga</h3>
                   </div>
-                  <h3 className="reason-card-title-sm" style={{ marginBottom: 0 }}>Petualangan Tak Terduga</h3>
+                  <span className="bento-like-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                    <span>{cardLikes[6]}</span>
+                  </span>
                 </div>
                 <p className="reason-card-text">
                   Entah itu obrolan spontan, perjalanan singkat, atau sekadar menikmati sore berdua, setiap detik bersamamu selalu terasa seperti petualangan indah.
@@ -250,7 +300,10 @@ export default function Reasons() {
           <div className="reasons-cat-section reveal">
             <div
               className="reasons-cat-wrap floating-element"
-              onClick={(e) => spawnHearts(e.clientX, e.clientY)}
+              onClick={(e) => {
+                playHeartPop()
+                spawnHearts(e.clientX, e.clientY)
+              }}
               style={{ cursor: 'pointer' }}
               title="Kirim cinta ✦"
             >

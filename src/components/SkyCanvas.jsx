@@ -12,36 +12,79 @@ export default function SkyCanvas() {
     let meteors = []
     let ripples = []
     let heartStars = []
-    const N = 180
+    let nebulaClouds = []
+    const N = 250 // More stars
+
+    // Mouse position for parallax
+    let mouseX = 0, mouseY = 0
 
     function resize() {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
       buildHeartStars()
+      buildNebulaClouds()
     }
 
     function buildHeartStars() {
       heartStars = []
-      const count = window.innerWidth < 760 ? 8 : 15
+      const count = window.innerWidth < 760 ? 10 : 18
       for (let i = 0; i < count; i++) {
         heartStars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height * 0.85 + canvas.height * 0.05,
-          scale: 6 + Math.random() * 8,
+          scale: 5 + Math.random() * 9,
           phase: Math.random() * Math.PI * 2,
-          speed: 0.4 + Math.random() * 0.8,
+          speed: 0.3 + Math.random() * 0.7,
         })
       }
     }
 
+    function buildNebulaClouds() {
+      nebulaClouds = []
+      const count = window.innerWidth < 760 ? 3 : 5
+      const colors = [
+        [227, 184, 234],
+        [194, 194, 242],
+        [184, 195, 255],
+        [255, 184, 198],
+        [184, 220, 255],
+      ]
+      for (let i = 0; i < count; i++) {
+        nebulaClouds.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height * 0.7,
+          r: 120 + Math.random() * 200,
+          color: colors[i % colors.length],
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.15 + Math.random() * 0.3,
+          driftX: (Math.random() - 0.5) * 0.08,
+          driftY: (Math.random() - 0.5) * 0.04,
+        })
+      }
+    }
+
+    // Create stars with more color variety
+    const starColors = [
+      '255,255,255',
+      '255,255,255',
+      '255,255,255',
+      '227,184,234',
+      '184,220,255',
+      '194,194,242',
+      '255,200,180',
+      '184,255,220',
+    ]
     for (let i = 0; i < N; i++) {
       stars.push({
         x: Math.random(),
         y: Math.random(),
-        r: Math.random() * 1.6,
+        r: Math.random() * 1.8,
         o: Math.random(),
         sp: Math.random() * 0.05,
-        color: Math.random() > 0.3 ? '255,255,255' : (Math.random() > 0.5 ? '227,184,234' : '184,220,255'),
+        color: starColors[Math.floor(Math.random() * starColors.length)],
+        depth: 0.3 + Math.random() * 0.7, // for parallax
+        twinkleSpeed: 0.02 + Math.random() * 0.04,
+        twinklePhase: Math.random() * Math.PI * 2,
       })
     }
 
@@ -70,24 +113,38 @@ export default function SkyCanvas() {
       const startX = fromTop ? Math.random() * canvas.width * 0.85 : Math.random() * canvas.width * 0.3
       const startY = fromTop ? -20 : Math.random() * canvas.height * 0.3
       const angle = (35 + Math.random() * 15) * (Math.PI / 180)
-      const speed = 9 + Math.random() * 8
+      const speed = 10 + Math.random() * 10
       meteors.push({
         x: startX,
         y: startY,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        len: 130 + Math.random() * 120,
+        len: 140 + Math.random() * 140,
         life: 1,
-        decay: 0.012 + Math.random() * 0.01,
+        decay: 0.010 + Math.random() * 0.008,
+        trailWidth: 1.8 + Math.random() * 1.2,
       })
+    }
+
+    // Meteor shower burst - spawn multiple at once sometimes
+    function spawnMeteorBurst() {
+      const count = 2 + Math.floor(Math.random() * 3)
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => spawnMeteor(), i * 150)
+      }
     }
 
     let meteorTimeout
     function scheduleMeteor() {
       meteorTimeout = setTimeout(() => {
-        spawnMeteor()
+        // 20% chance of burst
+        if (Math.random() < 0.2) {
+          spawnMeteorBurst()
+        } else {
+          spawnMeteor()
+        }
         scheduleMeteor()
-      }, 3000 + Math.random() * 4500)
+      }, 2500 + Math.random() * 4000)
     }
     scheduleMeteor()
 
@@ -105,21 +162,27 @@ export default function SkyCanvas() {
         const tailX = m.x - m.vx * (m.len / hyp)
         const tailY = m.y - m.vy * (m.len / hyp)
         const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY)
-        grad.addColorStop(0, `rgba(255,255,255,${0.95 * m.life})`)
-        grad.addColorStop(0.3, `rgba(227,184,234,${0.7 * m.life})`)
-        grad.addColorStop(0.6, `rgba(184,195,255,${0.4 * m.life})`)
+        grad.addColorStop(0, `rgba(255,255,255,${0.98 * m.life})`)
+        grad.addColorStop(0.2, `rgba(255,240,220,${0.85 * m.life})`)
+        grad.addColorStop(0.4, `rgba(227,184,234,${0.65 * m.life})`)
+        grad.addColorStop(0.7, `rgba(184,195,255,${0.35 * m.life})`)
         grad.addColorStop(1, 'rgba(194,194,242,0)')
         ctx.strokeStyle = grad
-        ctx.lineWidth = 2.2
+        ctx.lineWidth = m.trailWidth
         ctx.lineCap = 'round'
         ctx.beginPath()
         ctx.moveTo(m.x, m.y)
         ctx.lineTo(tailX, tailY)
         ctx.stroke()
+
+        // Brighter head glow
         ctx.beginPath()
         ctx.fillStyle = `rgba(255,255,255,${m.life})`
-        ctx.arc(m.x, m.y, 1.8, 0, Math.PI * 2)
+        ctx.shadowColor = `rgba(255,255,255,${m.life * 0.8})`
+        ctx.shadowBlur = 8
+        ctx.arc(m.x, m.y, 2.2, 0, Math.PI * 2)
         ctx.fill()
+        ctx.shadowBlur = 0
       }
     }
 
@@ -129,17 +192,34 @@ export default function SkyCanvas() {
         x: e.clientX,
         y: e.clientY,
         r: 5,
-        maxR: 90 + Math.random() * 40,
-        alpha: 0.8,
+        maxR: 100 + Math.random() * 50,
+        alpha: 0.85,
       })
+      // Spawn additional sparkle particles
+      for (let i = 0; i < 4; i++) {
+        ripples.push({
+          x: e.clientX + (Math.random() - 0.5) * 40,
+          y: e.clientY + (Math.random() - 0.5) * 40,
+          r: 2,
+          maxR: 20 + Math.random() * 15,
+          alpha: 0.6,
+        })
+      }
     }
     window.addEventListener('click', handleCanvasClick)
+
+    // Track mouse for parallax
+    function handleMouseMove(e) {
+      mouseX = (e.clientX / canvas.width - 0.5) * 2
+      mouseY = (e.clientY / canvas.height - 0.5) * 2
+    }
+    window.addEventListener('mousemove', handleMouseMove)
 
     function drawRipples() {
       for (let i = ripples.length - 1; i >= 0; i--) {
         const rp = ripples[i]
-        rp.r += 2.2
-        rp.alpha *= 0.94
+        rp.r += 2.5
+        rp.alpha *= 0.935
         if (rp.r > rp.maxR || rp.alpha < 0.02) {
           ripples.splice(i, 1)
           continue
@@ -147,13 +227,32 @@ export default function SkyCanvas() {
         ctx.save()
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(227,184,234,${rp.alpha * 0.6})`
+        ctx.strokeStyle = `rgba(227,184,234,${rp.alpha * 0.5})`
         ctx.lineWidth = 1.5
         ctx.shadowColor = 'rgba(194,194,242,0.8)'
-        ctx.shadowBlur = 8
+        ctx.shadowBlur = 10
         ctx.stroke()
         ctx.restore()
       }
+    }
+
+    function drawNebulaClouds(now) {
+      nebulaClouds.forEach((cloud) => {
+        const x = cloud.x + Math.sin(now * 0.0001 * cloud.speed + cloud.phase) * 30
+        const y = cloud.y + Math.cos(now * 0.00008 * cloud.speed + cloud.phase) * 20
+        const breathe = 0.8 + 0.2 * Math.sin(now * 0.0002 * cloud.speed + cloud.phase)
+
+        // Parallax effect
+        const px = x + mouseX * 8
+        const py = y + mouseY * 5
+
+        const grad = ctx.createRadialGradient(px, py, 0, px, py, cloud.r * breathe)
+        grad.addColorStop(0, `rgba(${cloud.color.join(',')},0.04)`)
+        grad.addColorStop(0.5, `rgba(${cloud.color.join(',')},0.02)`)
+        grad.addColorStop(1, `rgba(${cloud.color.join(',')},0)`)
+        ctx.fillStyle = grad
+        ctx.fillRect(px - cloud.r, py - cloud.r, cloud.r * 2, cloud.r * 2)
+      })
     }
 
     // Walking Constellation Cat
@@ -208,7 +307,7 @@ export default function SkyCanvas() {
       catPath = buildCatPath()
       catStarPoints = []
       let tries = 0
-      while (catStarPoints.length < 50 && tries < 5000) {
+      while (catStarPoints.length < 60 && tries < 6000) {
         tries++
         const px = Math.random() * catLocalW,
           py = Math.random() * catLocalH * 0.96 + 2
@@ -224,7 +323,7 @@ export default function SkyCanvas() {
         }
       }
       const sparkleIdx = []
-      while (sparkleIdx.length < 6 && catStarPoints.length > 0) {
+      while (sparkleIdx.length < 8 && catStarPoints.length > 0) {
         const ri = Math.floor(Math.random() * catStarPoints.length)
         if (!sparkleIdx.includes(ri)) sparkleIdx.push(ri)
       }
@@ -293,8 +392,8 @@ export default function SkyCanvas() {
 
       ctx.save()
       ctx.shadowColor = `rgba(184,195,255,${alpha * 0.5})`
-      ctx.shadowBlur = 16
-      ctx.fillStyle = `rgba(16,15,22,${alpha * 0.94})`
+      ctx.shadowBlur = 20
+      ctx.fillStyle = `rgba(12,11,18,${alpha * 0.94})`
       ctx.fill(catPath, 'nonzero')
       ctx.restore()
 
@@ -303,7 +402,7 @@ export default function SkyCanvas() {
         const pr = p.r * (0.7 + 0.5 * tw)
         if (p.sparkle) {
           ctx.shadowColor = `rgba(255,255,255,${alpha * 0.9})`
-          ctx.shadowBlur = 6
+          ctx.shadowBlur = 8
           drawSparkleStar(p.x, p.y, pr * 1.8, `rgba(255,255,255,${alpha * (0.55 + 0.45 * tw)})`)
           ctx.shadowBlur = 0
         } else {
@@ -315,7 +414,7 @@ export default function SkyCanvas() {
       })
 
       ctx.shadowColor = `rgba(184,255,240,${alpha * 0.9})`
-      ctx.shadowBlur = 6
+      ctx.shadowBlur = 8
       ctx.beginPath()
       ctx.fillStyle = `rgba(214,255,247,${alpha})`
       ctx.arc(46, 44, 2.6, 0, Math.PI * 2)
@@ -326,17 +425,37 @@ export default function SkyCanvas() {
 
     function loop(now) {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Draw nebula clouds first (background)
+      drawNebulaClouds(now || 0)
+
+      // Draw stars with parallax
       for (let i = 0; i < N; i++) {
         const p = stars[i]
-        p.o += (Math.random() - 0.5) * 0.05
-        if (p.o < 0) p.o = 0
-        if (p.o > 1) p.o = 1
+
+        // Improved twinkling
+        const twinkle = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin((now || 0) * 0.001 * p.twinkleSpeed * 60 + p.twinklePhase))
+
         const y = (p.y * canvas.height - (now || 0) * p.sp * 0.02) % canvas.height
+
+        // Parallax based on depth
+        const px = p.x * canvas.width + mouseX * p.depth * -8
+        const py = (y < 0 ? y + canvas.height : y) + mouseY * p.depth * -5
+
         ctx.beginPath()
-        ctx.arc(p.x * canvas.width, y < 0 ? y + canvas.height : y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${p.color},${p.o * 0.55})`
+        ctx.arc(px, py, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${p.color},${twinkle * 0.6})`
         ctx.fill()
+
+        // Larger stars get a subtle glow
+        if (p.r > 1.2) {
+          ctx.beginPath()
+          ctx.arc(px, py, p.r * 2.5, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${p.color},${twinkle * 0.08})`
+          ctx.fill()
+        }
       }
+
       drawMeteors()
       drawRipples()
       heartStars.forEach((hs) => {
@@ -358,6 +477,7 @@ export default function SkyCanvas() {
       clearTimeout(firstCatTimeout)
       window.removeEventListener('resize', resize)
       window.removeEventListener('click', handleCanvasClick)
+      window.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
 

@@ -33,6 +33,7 @@ export default function App() {
   const [active, setActive] = useState('#hero')
   const [swUnlocked, setSwUnlocked] = useState(false)
   const [lockToast, setLockToast] = useState(false)
+  const [scrollProgress, setScrollProgress] = useState(0)
   const overlayRef = useRef(null)
 
   useScrollReveal([swUnlocked])
@@ -72,27 +73,44 @@ export default function App() {
     }
   }, [swUnlocked])
 
+  // Scroll progress tracking + active section
   useEffect(() => {
-    function updateNav() {
-      const navH = (document.querySelector('nav')?.offsetHeight || 0) + 32
-      let current = '#hero'
-      for (const id of SECTION_IDS) {
-        const el = document.querySelector(id)
-        if (el && el.getBoundingClientRect().top <= navH) current = id
-      }
-      setActive(current)
-    }
     let ticking = false
     function onScroll() {
-      if (!ticking) { requestAnimationFrame(() => { updateNav(); ticking = false }); ticking = true }
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // Update scroll progress
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight
+          const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0
+          setScrollProgress(Math.min(100, Math.max(0, progress)))
+
+          // Update active section
+          const navH = (document.querySelector('nav')?.offsetHeight || 0) + 32
+          let current = '#hero'
+          for (const id of SECTION_IDS) {
+            const el = document.querySelector(id)
+            if (el && el.getBoundingClientRect().top <= navH) current = id
+          }
+          setActive(current)
+
+          ticking = false
+        })
+        ticking = true
+      }
     }
-    updateNav()
-    window.addEventListener('scroll', onScroll)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   return (
     <>
+      {/* Scroll Progress Bar */}
+      <div
+        className="scroll-progress"
+        style={{ width: `${scrollProgress}%` }}
+      />
+
       <div className="bg-overlay" ref={overlayRef} />
       <SkyCanvas />
       <AuroraCanvas />

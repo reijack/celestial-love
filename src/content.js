@@ -52,14 +52,43 @@ export const TIMELINE = [
   },
 ]
 
-export const LETTER = {
-  greeting: 'My dearest star,',
-  paragraphs: [
-    'In the quiet expanse of the night, when the world finally sleeps and only the constellations hold vigil, my thoughts inevitably drift to you. You are the gentle glow that cuts through my darkest spaces, the soft, steady rhythm in an otherwise chaotic universe.',
-    'Every single moment we share is a luminous spark, etching brilliant constellations of memories across my soul. I sit here beneath this endless sky, writing this not just with ink and words, but with the very pulse of my heart.',
-  ],
-  sign: 'Moon ✦',
-}
+export const LETTERS = [
+  {
+    id: 'midnight',
+    title: 'Di Heningnya Tengah Malam',
+    subtitle: 'Written at Midnight',
+    greeting: 'My dearest star,',
+    paragraphs: [
+      'In the quiet expanse of the night, when the world finally sleeps and only the constellations hold vigil, my thoughts inevitably drift to you. You are the gentle glow that cuts through my darkest spaces, the soft, steady rhythm in an otherwise chaotic universe.',
+      'Every single moment we share is a luminous spark, etching brilliant constellations of memories across my soul. I sit here beneath this endless sky, writing this not just with ink and words, but with the very pulse of my heart.',
+    ],
+    sign: 'Moon ✦',
+  },
+  {
+    id: 'promise',
+    title: 'Janji di Bawah Bintang',
+    subtitle: 'A Sacred Vow',
+    greeting: 'To the one who holds my heart,',
+    paragraphs: [
+      'Hubungan kita mungkin bukan tentang hari-hari yang selalu sempurna tanpa badai, tapi tentang bagaimana kita selalu memilih untuk saling menggenggam tangan melewatinya bersama.',
+      'Aku berjanji untuk selalu mendengarkanmu, merayakan setiap tawamu, dan menjadi tempat paling aman saat duniamu terasa berat. Di bawah langit yang sama, cintaku padamu akan selalu menemukan jalannya untuk pulang.',
+    ],
+    sign: 'Forever Yours ✦',
+  },
+  {
+    id: 'future',
+    title: 'Menatap Masa Depan',
+    subtitle: 'Looking Forward',
+    greeting: 'My beloved companion,',
+    paragraphs: [
+      'Setiap kali aku membayangkan hari-hari di masa depan, wajahmu adalah satu-satunya hal yang ingin selalu kutemukan di sampingku.',
+      'Mari kita terus merajut jutaan mimpi, mengarungi ribuan petualangan, dan menua bersama di bawah naungan rasi bintang yang sama. Perjalanan kita baru saja dimulai, dan aku tak sabar menjalani setiap detiknya bersamamu.',
+    ],
+    sign: 'To Infinity & Beyond ✦',
+  },
+]
+
+export const LETTER = LETTERS[0]
 
 export const SPOTIFY_PLAYLIST_URL =
   'https://open.spotify.com/playlist/37i9dQZF1E34wSszjH4s2V?si=eb55b9e83ec54284'

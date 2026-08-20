@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '../supabase'
 import { LIBRA_STARS, LIBRA_LINES, AQUARIUS_STARS, AQUARIUS_LINES } from '../content'
 import { spawnHearts } from '../hooks'
+import { playStarChime, playWishSavedSound, playHeartPop } from '../sound'
 
 const ALL_STARS = [
   ...LIBRA_STARS.map((s) => ({ x: s[0], y: s[1], size: s[2], name: s[3], mag: s[4], zodiac: 'libra' })),
@@ -243,6 +244,7 @@ export default function StarWishes({ unlocked }) {
     (idx) => {
       setDraft(wishes[idx]?.text || '')
       setModalIdx(idx)
+      playStarChime()
       if (!hintHidden) setHintHidden(true)
     },
     [wishes, hintHidden]
@@ -267,6 +269,7 @@ export default function StarWishes({ unlocked }) {
     setBursts((b) => [...b, { id: burstId, x: star.x, y: star.y }])
     setTimeout(() => setBursts((b) => b.filter((x) => x.id !== burstId)), 800)
 
+    playWishSavedSound()
     setToast('Harapanmu telah bersinar di langit bintang ✦')
     setTimeout(() => setToast(null), 2500)
 
@@ -391,19 +394,28 @@ export default function StarWishes({ unlocked }) {
             <div className="sw-filters">
               <button
                 className={`sw-filter-btn ${filterZodiac === 'all' ? 'active' : ''}`}
-                onClick={() => setFilterZodiac('all')}
+                onClick={() => {
+                  setFilterZodiac('all')
+                  playHeartPop()
+                }}
               >
                 Semua ({count})
               </button>
               <button
                 className={`sw-filter-btn ${filterZodiac === 'libra' ? 'active' : ''}`}
-                onClick={() => setFilterZodiac('libra')}
+                onClick={() => {
+                  setFilterZodiac('libra')
+                  playHeartPop()
+                }}
               >
                 ♎ Libra
               </button>
               <button
                 className={`sw-filter-btn ${filterZodiac === 'aquarius' ? 'active' : ''}`}
-                onClick={() => setFilterZodiac('aquarius')}
+                onClick={() => {
+                  setFilterZodiac('aquarius')
+                  playHeartPop()
+                }}
               >
                 ♒ Aquarius
               </button>
@@ -489,7 +501,10 @@ export default function StarWishes({ unlocked }) {
                   key={i}
                   type="button"
                   className="sw-preset-chip"
-                  onClick={() => setDraft(preset)}
+                  onClick={() => {
+                    setDraft(preset)
+                    playHeartPop()
+                  }}
                 >
                   {preset.slice(0, 32)}...
                 </button>
