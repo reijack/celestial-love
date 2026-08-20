@@ -24,8 +24,8 @@ export default function SkyCanvas() {
     let targetRawX = -1000, targetRawY = -1000
 
     function resize() {
-      // Use 1.5 max DPR for crisp visuals without 4K GPU memory overhead
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      const isMobile = window.innerWidth < 768
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)
       const w = window.innerWidth
       const h = window.innerHeight
       canvas.width = w * dpr
@@ -40,8 +40,8 @@ export default function SkyCanvas() {
 
     function buildStars() {
       stars = []
-      const w = window.innerWidth
-      const N = w < 768 ? 110 : 180
+      const isMobile = window.innerWidth < 768
+      const N = isMobile ? 60 : 180
       const starColors = [
         '255,255,255',
         '255,250,240',
@@ -71,7 +71,7 @@ export default function SkyCanvas() {
       const MAX_DIST_SQ = 0.08 * 0.08 // in normalized coords
       for (let i = 0; i < stars.length; i += 2) {
         if (stars[i].depth < 0.4) continue
-        for (let j = i + 1; j < Math.min(i + 8, stars.length); j++) {
+        for (let j = i + 1; j < Math.min(i + (isMobile ? 4 : 8), stars.length); j++) {
           const dx = stars[i].x - stars[j].x
           const dy = stars[i].y - stars[j].y
           const distSq = dx * dx + dy * dy
@@ -79,7 +79,7 @@ export default function SkyCanvas() {
             constellationLinks.push({
               i1: i,
               i2: j,
-              maxAlpha: (1 - Math.sqrt(distSq) / 0.08) * 0.16,
+              maxAlpha: (1 - Math.sqrt(distSq) / 0.08) * (isMobile ? 0.12 : 0.16),
             })
           }
         }
@@ -88,7 +88,8 @@ export default function SkyCanvas() {
 
     function buildHeartStars() {
       heartStars = []
-      const count = window.innerWidth < 760 ? 5 : 9
+      const isMobile = window.innerWidth < 768
+      const count = isMobile ? 3 : 9
       for (let i = 0; i < count; i++) {
         heartStars.push({
           x: Math.random() * window.innerWidth,

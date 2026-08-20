@@ -36,7 +36,6 @@ export default function App() {
   const [active, setActive] = useState('#hero')
   const [swUnlocked, setSwUnlocked] = useState(false)
   const [lockToast, setLockToast] = useState(false)
-  const [scrollProgress, setScrollProgress] = useState(0)
   const overlayRef = useRef(null)
 
   useScrollReveal([swUnlocked])
@@ -76,31 +75,47 @@ export default function App() {
     }
   }, [swUnlocked])
 
-  // Scroll progress tracking + active section
+  // Scroll progress tracking + active section with zero re-render overhead
+  const progressRef = useRef(null)
+  const activeRef = useRef('#hero')
+
   useEffect(() => {
     let ticking = false
+    let lastSection = '#hero'
+
     function onScroll() {
       if (!ticking) {
         requestAnimationFrame(() => {
-          // Update scroll progress
+          // 1. Direct DOM update for progress bar (0 React re-renders)
           const docHeight = document.documentElement.scrollHeight - window.innerHeight
           const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0
-          setScrollProgress(Math.min(100, Math.max(0, progress)))
-
-          // Update active section
-          const navH = (document.querySelector('nav')?.offsetHeight || 0) + 32
-          let current = '#hero'
-          for (const id of SECTION_IDS) {
-            const el = document.querySelector(id)
-            if (el && el.getBoundingClientRect().top <= navH) current = id
+          if (progressRef.current) {
+            progressRef.current.style.width = `${Math.min(100, Math.max(0, progress))}%`
           }
-          setActive(current)
+
+          // 2. Active section update only when changed
+          const navH = 90
+          let current = '#hero'
+          for (let i = SECTION_IDS.length - 1; i >= 0; i--) {
+            const id = SECTION_IDS[i]
+            const el = document.querySelector(id)
+            if (el && el.getBoundingClientRect().top <= navH) {
+              current = id
+              break
+            }
+          }
+
+          if (current !== lastSection) {
+            lastSection = current
+            setActive(current)
+          }
 
           ticking = false
         })
         ticking = true
       }
     }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -111,7 +126,8 @@ export default function App() {
       {/* Scroll Progress Bar */}
       <div
         className="scroll-progress"
-        style={{ width: `${scrollProgress}%` }}
+        ref={progressRef}
+        style={{ width: '0%' }}
       />
 
       <div className="bg-overlay" ref={overlayRef} />

@@ -35,9 +35,10 @@ export default function AuroraCanvas() {
     let raf
 
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      const isMobile = window.innerWidth < 768
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)
       const w = window.innerWidth
-      const h = Math.max(300, window.innerHeight * 0.52)
+      const h = Math.max(260, window.innerHeight * (isMobile ? 0.42 : 0.52))
       canvas.width = w * dpr
       canvas.height = h * dpr
       canvas.style.width = w + 'px'
@@ -51,11 +52,12 @@ export default function AuroraCanvas() {
     let targetIntensity = currentIntensity
 
     function drawAuroraRibbon(r, t, intensity) {
+      const isMobile = window.innerWidth < 768
       const w = window.innerWidth
-      const h = Math.max(300, window.innerHeight * 0.52)
+      const h = Math.max(260, window.innerHeight * (isMobile ? 0.42 : 0.52))
       const baseY = h * r.yBase
 
-      const step = 14
+      const step = isMobile ? 28 : 14
       const points = []
       for (let xp = 0; xp <= w + step; xp += step) {
         const y =

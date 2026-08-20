@@ -5,11 +5,11 @@ function rnd(min, max) {
 }
 
 export default function AmbientParticles() {
-  const isSmall = typeof window !== 'undefined' && window.innerWidth < 760
+  const isSmall = typeof window !== 'undefined' && window.innerWidth < 768
 
   // Glowing fireflies
   const fireflies = useMemo(() => {
-    const count = isSmall ? 10 : 20
+    const count = isSmall ? 5 : 20
     return Array.from({ length: count }, () => {
       const size = rnd(3, 7.5)
       const colors = [
@@ -23,14 +23,14 @@ export default function AmbientParticles() {
         size,
         left: rnd(2, 98),
         top: rnd(8, 92),
-        fx1: rnd(-80, 80),
-        fy1: rnd(-70, 70),
-        fx2: rnd(-95, 95),
-        fy2: rnd(-60, 60),
-        fx3: rnd(-70, 70),
-        fy3: rnd(-85, 85),
-        fx4: rnd(-85, 85),
-        fy4: rnd(-45, 45),
+        fx1: rnd(-60, 60),
+        fy1: rnd(-50, 50),
+        fx2: rnd(-70, 70),
+        fy2: rnd(-50, 50),
+        fx3: rnd(-50, 50),
+        fy3: rnd(-60, 60),
+        fx4: rnd(-60, 60),
+        fy4: rnd(-40, 40),
         driftDur: rnd(14, 26),
         glowDur: rnd(2.2, 5),
         d1: rnd(0, 8),
@@ -42,7 +42,7 @@ export default function AmbientParticles() {
 
   // Ambient Stardust
   const stardust = useMemo(() => {
-    const count = isSmall ? 35 : 75
+    const count = isSmall ? 10 : 75
     return Array.from({ length: count }, () => {
       const colors = [
         'rgba(241,238,247,0.65)',
@@ -53,14 +53,14 @@ export default function AmbientParticles() {
         'rgba(255,235,190,0.5)',
       ]
       return {
-        size: rnd(0.5, 2.2),
+        size: rnd(0.5, 2),
         left: rnd(0, 100),
         top: rnd(0, 100),
-        dx: rnd(-60, 60),
-        dy: rnd(-110, -20),
-        floatDur: rnd(16, 40),
-        twinkleDur: rnd(2.5, 6),
-        d1: rnd(0, 20),
+        dx: rnd(-40, 40),
+        dy: rnd(-80, -20),
+        floatDur: rnd(16, 35),
+        twinkleDur: rnd(2.5, 5),
+        d1: rnd(0, 15),
         d2: rnd(0, 5),
         bg: colors[Math.floor(Math.random() * colors.length)],
       }
@@ -69,15 +69,15 @@ export default function AmbientParticles() {
 
   // Sparkling Diamond Crystals
   const crystals = useMemo(() => {
-    const count = isSmall ? 6 : 12
+    const count = isSmall ? 3 : 12
     return Array.from({ length: count }, () => ({
-      size: rnd(3.5, 7),
+      size: rnd(3, 6),
       left: rnd(4, 96),
       top: rnd(4, 92),
-      rotateDur: rnd(8, 22),
-      twinkleDur: rnd(3, 6.5),
-      d1: rnd(0, 10),
-      d2: rnd(0, 5),
+      rotateDur: rnd(8, 20),
+      twinkleDur: rnd(3, 6),
+      d1: rnd(0, 8),
+      d2: rnd(0, 4),
     }))
   }, [isSmall])
 

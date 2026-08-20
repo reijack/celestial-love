@@ -3824,8 +3824,38 @@ footer::before {
    MASTER MOBILE RESPONSIVENESS (SMARTPHONES & TABLETS)
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+
+  /* 🚀 GPU & Scrolling Performance Boost */
   section {
     padding: 5rem 1rem 2.5rem;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 600px;
+  }
+
+  #hero {
+    content-visibility: visible;
+  }
+
+  /* Ringankan rendering kartu kaca di HP */
+  .glass,
+  .glass-panel,
+  .glass-card {
+    background: rgba(18, 17, 26, 0.82) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45) !important;
+  }
+
+  .glass::before,
+  .glass-panel::before,
+  .glass-card::before {
+    display: none !important;
+    animation: none !important;
+  }
+
+  .nebula-glow {
+    animation: none !important;
+    opacity: 0.55 !important;
   }
 
   .section-header {
