@@ -75,6 +75,11 @@ body::before {
   100% { opacity: 1; transform: scale(1); filter: blur(0); }
 }
 
+#root {
+  min-height: 100vh;
+  position: relative;
+}
+
 /* ── Scroll Progress Bar ── */
 .scroll-progress {
   position: fixed;
