@@ -5,8 +5,11 @@ import { toggleMute, getMuteState, playHeartPop, playStarChime, playShootingStar
 const LINKS = [
   { id: '#hero', label: 'Home', icon: 'home' },
   { id: '#timeline', label: 'Timeline', icon: 'auto_stories' },
-  { id: '#letter', label: 'Letter', icon: 'favorite' },
-  { id: '#reasons', label: 'Reasons', icon: 'format_list_bulleted' },
+  { id: '#coupons', label: 'Coupons', icon: 'confirmation_number' },
+  { id: '#letter', label: 'Letters', icon: 'mail' },
+  { id: '#reasons', label: 'Reasons', icon: 'favorite' },
+  { id: '#oracle', label: 'Oracle', icon: 'auto_awesome' },
+  { id: '#bucketlist', label: 'Bucket List', icon: 'checklist' },
   { id: '#starwishes', label: 'Star Wishes', icon: 'star' },
 ]
 

@@ -2,8 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Timeline from './components/Timeline'
+import LoveCoupons from './components/LoveCoupons'
 import Letter from './components/Letter'
 import Reasons from './components/Reasons'
+import CosmicOracle from './components/CosmicOracle'
+import BucketList from './components/BucketList'
 import StarWishes from './components/StarWishes'
 import Footer from './components/Footer'
 import MusicPlayer from './components/MusicPlayer'
@@ -15,7 +18,7 @@ import MidnightSky from './components/MidnightSky'
 import CustomCursor from './components/CustomCursor'
 import { useScrollReveal } from './hooks'
 
-const SECTION_IDS = ['#hero', '#timeline', '#letter', '#reasons', '#starwishes']
+const SECTION_IDS = ['#hero', '#timeline', '#coupons', '#letter', '#reasons', '#oracle', '#bucketlist', '#starwishes']
 
 // Waktu-hari background gradient bands
 const BANDS = [
@@ -124,8 +127,11 @@ export default function App() {
 
       <Hero onNavigate={handleNavigate} />
       <Timeline />
+      <LoveCoupons />
       <Letter />
       <Reasons />
+      <CosmicOracle />
+      <BucketList />
       <StarWishes unlocked={swUnlocked} />
 
       <Footer swUnlocked={swUnlocked} onNavigate={handleNavigate} onLockedClick={() => { setLockToast(true); setTimeout(() => setLockToast(false), 2200) }} />

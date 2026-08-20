@@ -10,7 +10,7 @@ export default function QRLove() {
   const canvasRef = useRef(null)
   const [ready, setReady] = useState(false)
   const [copied, setCopied] = useState(false)
-  
+
   // Get active URL or default to the live site
   const getActiveUrl = () => {
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -203,7 +203,7 @@ export default function QRLove() {
     ctx.textAlign = 'center'
     ctx.font = '600 13px "Plus Jakarta Sans", sans-serif'
     ctx.fillStyle = '#f3dcf6'
-    ctx.fillText('Our Love Story ✦ 26 Agustus 2025', cx, H - 74)
+    ctx.fillText('Our Love Story', cx, H - 74)
 
     ctx.font = '11px "Plus Jakarta Sans", sans-serif'
     ctx.fillStyle = 'rgba(241, 238, 247, 0.6)'

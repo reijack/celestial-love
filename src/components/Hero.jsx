@@ -21,8 +21,21 @@ function calculateLoveTime() {
   return { days, hours, minutes, seconds, heartbeats }
 }
 
+// Next Milestone target: 1st Year Anniversary (26 Agustus 2026)
+const NEXT_MILESTONE_DATE = new Date('2026-08-26T00:00:00+07:00').getTime()
+
+function calculateNextMilestone() {
+  const now = new Date().getTime()
+  const diff = Math.max(0, NEXT_MILESTONE_DATE - now)
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
+  const minutes = Math.floor((diff / 1000 / 60) % 60)
+  return { days, hours, minutes }
+}
+
 export default function Hero({ onNavigate }) {
   const [time, setTime] = useState(calculateLoveTime)
+  const [nextMilestone, setNextMilestone] = useState(calculateNextMilestone)
   const [hugCount, setHugCount] = useState(143)
   const [hugToast, setHugToast] = useState(false)
   const cardRef = useRef(null)
@@ -31,6 +44,7 @@ export default function Hero({ onNavigate }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(calculateLoveTime())
+      setNextMilestone(calculateNextMilestone())
     }, 1000)
     return () => clearInterval(timer)
   }, [])
@@ -164,6 +178,16 @@ export default function Hero({ onNavigate }) {
             </div>
           </div>
 
+          {/* Next Anniversary Milestone Pill */}
+          <div className="hero-milestone-pill">
+            <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--accent-gold)' }}>
+              celebration
+            </span>
+            <span>
+              <strong>{nextMilestone.days} Hari {nextMilestone.hours} Jam</strong> menuju 1st Anniversary (26 Agustus 2026) ✦
+            </span>
+          </div>
+
           {/* Interactive Heartbeat & Hug stats */}
           <div
             style={{
@@ -175,6 +199,8 @@ export default function Hero({ onNavigate }) {
               justifyContent: 'space-between',
               fontSize: '0.74rem',
               color: 'var(--on-surface-variant)',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -219,6 +245,18 @@ export default function Hero({ onNavigate }) {
             <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
               arrow_forward
             </span>
+          </button>
+          <button
+            className="btn-celestial-secondary"
+            onClick={() => {
+              playHeartPop()
+              onNavigate('#coupons')
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
+              confirmation_number
+            </span>
+            <span>Kupon Cinta</span>
           </button>
           <button
             className="btn-celestial-secondary"

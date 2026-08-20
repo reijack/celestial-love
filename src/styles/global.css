@@ -1228,3 +1228,817 @@ footer::before {
   0% { transform: translate(-50%,-50%) scale(0.3); opacity: 1; }
   100% { transform: translate(-50%,-50%) scale(2); opacity: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO MILESTONE PILL
+   ═══════════════════════════════════════════════════════════════ */
+.hero-milestone-pill {
+  margin-top: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  background: rgba(255, 216, 158, 0.09);
+  border: 1px dashed rgba(255, 216, 158, 0.35);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  color: var(--accent-gold);
+  animation: float-soft 4s ease-in-out infinite alternate;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOVE COUPONS SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+.coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.coupon-card {
+  position: relative;
+  border-radius: 1.5rem;
+  padding: 1.75rem 1.6rem 1.4rem;
+  background: rgba(20, 19, 27, 0.7);
+  border: 1px solid var(--outline);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+}
+
+.coupon-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(227, 184, 234, 0.4);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 24px rgba(227, 184, 234, 0.15);
+}
+
+.coupon-card.claimed {
+  background: rgba(16, 15, 22, 0.85);
+  border-color: rgba(255, 215, 0, 0.25);
+  opacity: 0.88;
+}
+
+/* Perforated Notches */
+.coupon-notch {
+  position: absolute;
+  top: 66%;
+  width: 22px;
+  height: 22px;
+  background: var(--bg);
+  border-radius: 50%;
+  z-index: 5;
+  border: 1px solid var(--outline);
+}
+.coupon-notch-left {
+  left: -12px;
+  transform: translateY(-50%);
+}
+.coupon-notch-right {
+  right: -12px;
+  transform: translateY(-50%);
+}
+
+.coupon-holo-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(227, 184, 234, 0.04) 30%,
+    rgba(184, 195, 255, 0.08) 50%,
+    rgba(255, 216, 158, 0.04) 70%,
+    transparent 100%
+  );
+  opacity: 0.6;
+}
+
+.coupon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.coupon-tag-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.coupon-icon-box {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--outline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coupon-body {
+  margin-bottom: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.coupon-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--on-surface);
+  margin: 0 0 0.5rem;
+  line-height: 1.35;
+}
+
+.coupon-desc {
+  font-size: 0.84rem;
+  color: var(--on-surface-variant);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.coupon-dashed-line {
+  border-top: 1.5px dashed rgba(255, 255, 255, 0.12);
+  margin: 0.75rem 0 1rem;
+  position: relative;
+}
+
+.coupon-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.coupon-code {
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: var(--on-surface-variant);
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+}
+
+.coupon-claim-btn {
+  background: linear-gradient(135deg, rgba(227, 184, 234, 0.25), rgba(194, 194, 242, 0.25));
+  border: 1px solid rgba(227, 184, 234, 0.4);
+  color: var(--on-surface);
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.coupon-claim-btn:hover {
+  background: linear-gradient(135deg, rgba(227, 184, 234, 0.45), rgba(194, 194, 242, 0.45));
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(227, 184, 234, 0.3);
+}
+
+.coupon-claimed-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.coupon-claimed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.06em;
+}
+
+.coupon-unclaim-btn {
+  background: transparent;
+  border: none;
+  color: var(--on-surface-variant);
+  font-size: 0.68rem;
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.coupon-unclaim-btn:hover { opacity: 1; color: var(--error); }
+
+/* Golden Stamp Seal Overlay */
+.coupon-stamp-seal {
+  position: absolute;
+  top: 40%;
+  right: 1.25rem;
+  transform: translateY(-50%) rotate(-12deg);
+  pointer-events: none;
+  z-index: 10;
+  animation: stamp-drop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes stamp-drop {
+  0% { transform: translateY(-50%) rotate(-12deg) scale(2.2); opacity: 0; }
+  100% { transform: translateY(-50%) rotate(-12deg) scale(1); opacity: 0.95; }
+}
+
+.coupon-stamp-circle {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 2.5px dashed #ffd700;
+  color: #ffd700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 215, 0, 0.08);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25), inset 0 0 10px rgba(255, 215, 0, 0.15);
+}
+
+.stamp-star { font-size: 0.9rem; line-height: 1; }
+.stamp-text { font-size: 0.75rem; font-weight: 900; letter-spacing: 0.1em; line-height: 1.2; }
+.stamp-date { font-size: 0.52rem; opacity: 0.85; font-weight: 600; }
+
+.custom-coupon-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--outline);
+  border-radius: 0.85rem;
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.25s;
+}
+.custom-coupon-input:focus {
+  border-color: var(--secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COSMIC ORACLE & HARMONY RESONATOR
+   ═══════════════════════════════════════════════════════════════ */
+.oracle-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 2.5rem;
+  align-items: center;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .oracle-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.oracle-deck-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.oracle-card-container {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 360px;
+  height: 480px;
+  margin: 0 auto;
+}
+
+.oracle-3d-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.oracle-3d-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.oracle-3d-card.shuffling {
+  animation: card-shuffle 0.45s ease-in-out;
+}
+
+@keyframes card-shuffle {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(0.92) rotate(-8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.oracle-card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.75rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+  padding: 2rem 1.75rem;
+  border: 1.5px solid var(--outline);
+  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.oracle-card-back {
+  background: radial-gradient(circle at 50% 50%, #201a33 0%, #110d1c 100%);
+  border-color: rgba(227, 184, 234, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oracle-card-back-inner {
+  text-align: center;
+  border: 1px dashed rgba(227, 184, 234, 0.3);
+  border-radius: 1.25rem;
+  padding: 3rem 1.5rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.oracle-back-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--secondary);
+  margin-top: 1rem;
+}
+
+.oracle-back-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--on-surface-variant);
+  margin-top: 0.35rem;
+}
+
+.oracle-back-hint {
+  margin-top: 2rem;
+  font-size: 0.78rem;
+  color: var(--primary);
+  opacity: 0.85;
+}
+
+.oracle-card-front {
+  transform: rotateY(180deg);
+  background: rgba(18, 16, 26, 0.94);
+  border-color: rgba(227, 184, 234, 0.4);
+}
+
+.oracle-front-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  filter: blur(30px);
+}
+
+.oracle-card-front-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+}
+
+.oracle-front-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.oracle-card-number {
+  font-family: monospace;
+  font-size: 0.74rem;
+  color: var(--on-surface-variant);
+  letter-spacing: 0.1em;
+}
+
+.oracle-card-harmony-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 147, 168, 0.15);
+  color: var(--error);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.oracle-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 0.8rem 0;
+}
+
+.oracle-icon-circle {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.oracle-card-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  text-align: center;
+  margin: 0 0 0.25rem;
+}
+
+.oracle-card-meta {
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--on-surface-variant);
+  margin-bottom: 0.85rem;
+}
+
+.oracle-quote-box {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 2.5px solid var(--secondary);
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 0.65rem 0.65rem 0;
+  margin-bottom: 0.75rem;
+}
+
+.oracle-quote-text {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--on-surface);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.oracle-blessing-box {
+  background: rgba(227, 184, 234, 0.08);
+  border: 1px solid rgba(227, 184, 234, 0.2);
+  border-radius: 0.85rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.oracle-blessing-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--secondary);
+  margin-bottom: 0.25rem;
+}
+
+.oracle-blessing-text {
+  font-size: 0.78rem;
+  color: var(--on-surface);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.oracle-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 1.25rem;
+}
+
+/* Harmony Resonator Panel */
+.harmony-panel {
+  padding: 2.25rem 2rem;
+  border-radius: 1.75rem;
+}
+
+.harmony-header {
+  margin-bottom: 1.75rem;
+}
+
+.harmony-icon-pair {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.zodiac-avatar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  border: 1px solid var(--outline);
+}
+.zodiac-avatar-badge.libra {
+  background: rgba(184, 195, 255, 0.15);
+  color: var(--tertiary);
+}
+.zodiac-avatar-badge.aquarius {
+  background: rgba(227, 184, 234, 0.15);
+  color: var(--secondary);
+}
+
+.harmony-link-symbol {
+  color: var(--accent-warm);
+  font-size: 1.1rem;
+}
+
+.harmony-title {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  margin: 0 0 0.4rem;
+}
+
+.harmony-sub {
+  font-size: 0.86rem;
+  color: var(--on-surface-variant);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.harmony-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.harmony-metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.harmony-metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.harmony-metric-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.harmony-metric-val {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+.harmony-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.harmony-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent-warm));
+  box-shadow: 0 0 10px rgba(227, 184, 234, 0.4);
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.harmony-metric-desc {
+  font-size: 0.72rem;
+  color: var(--on-surface-variant);
+}
+
+.harmony-oracle-verdict {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--outline);
+  border-radius: 1rem;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--on-surface);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUCKET LIST SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+.bucket-progress-card {
+  padding: 1.75rem 2rem;
+  border-radius: 1.5rem;
+  margin-top: 1.75rem;
+  background: rgba(22, 20, 30, 0.75);
+}
+
+.bucket-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bucket-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bucket-progress-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--on-surface);
+}
+
+.bucket-progress-sub {
+  font-size: 0.8rem;
+  color: var(--on-surface-variant);
+  margin-top: 0.2rem;
+}
+
+.bucket-progress-bar-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bucket-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--secondary), var(--primary), var(--accent-gold));
+  border-radius: 999px;
+  position: relative;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 14px rgba(227, 184, 234, 0.5);
+}
+
+.bucket-progress-bar-sparkle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: #ffffff;
+  opacity: 0.8;
+  filter: blur(2px);
+}
+
+.bucket-filter-row {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.bucket-filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--outline);
+  color: var(--on-surface-variant);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bucket-filter-btn.active, .bucket-filter-btn:hover {
+  background: rgba(227, 184, 234, 0.18);
+  border-color: rgba(227, 184, 234, 0.45);
+  color: var(--secondary);
+}
+
+.bucket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.bucket-card {
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: rgba(20, 19, 28, 0.7);
+  border: 1px solid var(--outline);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justifyContent: space-between;
+}
+
+.bucket-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(227, 184, 234, 0.35);
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+}
+
+.bucket-card.completed {
+  background: rgba(18, 22, 28, 0.75);
+  border-color: rgba(184, 220, 255, 0.35);
+}
+
+.bucket-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.bucket-category-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(194, 194, 242, 0.12);
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+}
+
+.bucket-check-btn {
+  background: transparent;
+  border: none;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.bucket-check-btn:hover { transform: scale(1.15); }
+.bucket-check-btn.checked { color: var(--accent-gold); }
+
+.bucket-card-body {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.bucket-icon-box {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--outline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+.bucket-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.bucket-card-desc {
+  font-size: 0.82rem;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.bucket-completed-badge {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+

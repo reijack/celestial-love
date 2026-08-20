@@ -30,8 +30,11 @@ export default function Footer({ swUnlocked, onNavigate, onLockedClick }) {
   const links = [
     { id: '#hero', label: 'Home' },
     { id: '#timeline', label: 'Timeline' },
+    { id: '#coupons', label: 'Coupons' },
     { id: '#letter', label: 'Letters' },
     { id: '#reasons', label: 'Reasons' },
+    { id: '#oracle', label: 'Oracle' },
+    { id: '#bucketlist', label: 'Bucket List' },
     { id: '#starwishes', label: 'Star Wishes' },
   ]
 
