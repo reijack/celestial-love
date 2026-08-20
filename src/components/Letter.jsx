@@ -7,6 +7,7 @@ export default function Letter() {
   const [isOpen, setIsOpen] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
   const [copied, setCopied] = useState(false)
+  const [heartSaved, setHeartSaved] = useState(false)
   const cardRef = useRef(null)
 
   const currentLetter = LETTERS[activeTab] || LETTERS[0]
@@ -52,15 +53,27 @@ export default function Letter() {
     spawnHearts(e.clientX, e.clientY)
   }
 
+  function saveToHeart(e) {
+    setHeartSaved(true)
+    playHeartPop()
+    spawnHearts(e.clientX, e.clientY)
+    setTimeout(() => setHeartSaved(false), 2500)
+  }
+
   return (
     <section id="letter" style={{ maxWidth: '1200px' }}>
       <div className="section-header">
         <div className="section-eyebrow reveal">
-          <span className="material-symbols-outlined filled" style={{ fontSize: '0.875rem' }}>edit_note</span>
+          <span className="material-symbols-outlined filled" style={{ fontSize: '0.875rem' }}>
+            edit_note
+          </span>
           <span>Surat Cinta di Bawah Bintang</span>
         </div>
         <h2 className="text-headline gradient-text-shimmer reveal reveal-delay-1">Letters from My Heart</h2>
-        <p className="text-body-lg reveal reveal-delay-2" style={{ color: 'var(--on-surface-variant)', maxWidth: '36rem', margin: '0.75rem auto 0' }}>
+        <p
+          className="text-body-lg reveal reveal-delay-2"
+          style={{ color: 'var(--on-surface-variant)', maxWidth: '36rem', margin: '0.75rem auto 0' }}
+        >
           Untaian kata dan janji suci yang dirajut di heningnya malam, khusus untukmu yang selalu menyinari semestaku.
         </p>
 
@@ -93,7 +106,9 @@ export default function Letter() {
           >
             <div className="envelope-glow" />
             <div className="envelope-stamp">
-              <span className="material-symbols-outlined filled twinkle" style={{ fontSize: '1.25rem' }}>auto_awesome</span>
+              <span className="material-symbols-outlined filled twinkle" style={{ fontSize: '1.25rem' }}>
+                auto_awesome
+              </span>
             </div>
             <div className="wax-seal floating-element">
               <div className="wax-seal-inner">
@@ -104,7 +119,12 @@ export default function Letter() {
             <div className="envelope-meta">
               <span className="envelope-to">Kepada: Pemilik Hatiku</span>
               <span className="envelope-hint">
-                <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '0.3rem' }}>touch_app</span>
+                <span
+                  className="material-symbols-outlined filled"
+                  style={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '0.3rem' }}
+                >
+                  touch_app
+                </span>
                 Klik Segel untuk Membuka Surat Cinta
               </span>
             </div>
@@ -127,14 +147,31 @@ export default function Letter() {
                   <h1 className="letter-title gradient-text">{currentLetter.title}</h1>
                   <div className="letter-divider" />
                 </div>
-                <button
-                  className="letter-seal-toggle-btn"
-                  onClick={toggleOpen}
-                  title="Tutup kembali surat ke amplop"
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>drafts</span>
-                  <span>Tutup Amplop</span>
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    className="letter-seal-toggle-btn"
+                    onClick={(e) => {
+                      playStarChime()
+                      spawnHearts(e.clientX, e.clientY)
+                    }}
+                    title="Dengarkan harmoni bintang"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                      music_note
+                    </span>
+                    <span>Melodi</span>
+                  </button>
+                  <button
+                    className="letter-seal-toggle-btn"
+                    onClick={toggleOpen}
+                    title="Tutup kembali surat ke amplop"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                      drafts
+                    </span>
+                    <span>Tutup Amplop</span>
+                  </button>
+                </div>
               </div>
 
               <p className="letter-body italic letter-greeting">{currentLetter.greeting}</p>
@@ -152,7 +189,9 @@ export default function Letter() {
 
               <div className="letter-footer">
                 <div className="letter-footer-info">
-                  <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>schedule</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>
+                    schedule
+                  </span>
                   <span>Ditulis dengan Ketulusan Hati ✦</span>
                 </div>
                 <div className="letter-footer-buttons">
@@ -162,17 +201,14 @@ export default function Letter() {
                     </span>
                     <span>{copied ? 'Tersalin di Hatimu ✦' : 'Salin Surat'}</span>
                   </button>
-                  <button
-                    className="letter-footer-btn letter-btn-heart"
-                    onClick={(e) => {
-                      playHeartPop()
-                      spawnHearts(e.clientX, e.clientY)
-                    }}
-                  >
-                    <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>
+                  <button className="letter-footer-btn letter-btn-heart" onClick={saveToHeart}>
+                    <span
+                      className="material-symbols-outlined filled heartbeat"
+                      style={{ fontSize: '1rem', color: 'var(--error)' }}
+                    >
                       favorite
                     </span>
-                    <span>Simpan ke Hati</span>
+                    <span>{heartSaved ? 'Tersimpan Selamanya ✦' : 'Simpan ke Hati'}</span>
                   </button>
                 </div>
               </div>

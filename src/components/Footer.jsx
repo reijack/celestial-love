@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { spawnHearts } from '../hooks'
+import { playHeartPop, playStarChime } from '../sound'
 
 const LOVE_QUOTES = [
   '"In all the world, there is no heart for me like yours." ✦',
@@ -32,18 +34,32 @@ export default function Footer({ swUnlocked, onNavigate, onLockedClick }) {
     { id: '#reasons', label: 'Reasons' },
     { id: '#starwishes', label: 'Star Wishes' },
   ]
+
+  function handleSendLove(e) {
+    playHeartPop()
+    playStarChime()
+    spawnHearts(e.clientX, e.clientY)
+  }
+
   return (
     <footer>
       <div className="footer-inner">
-        <div className="footer-brand">
-          <span className="material-symbols-outlined filled breathing-glow" style={{ fontSize: '1rem' }}>star</span>
-          Celestial Love
+        <div
+          className="footer-brand"
+          onClick={handleSendLove}
+          style={{ cursor: 'pointer' }}
+          title="Klik untuk mengirim cinta ✦"
+        >
+          <span className="material-symbols-outlined filled breathing-glow" style={{ fontSize: '1.2rem', color: 'var(--secondary)' }}>
+            auto_awesome
+          </span>
+          <span>Celestial Love ✦</span>
         </div>
 
         <p
           className="footer-love-quote"
           style={{
-            opacity: fadeIn ? 0.7 : 0,
+            opacity: fadeIn ? 0.75 : 0,
             transform: fadeIn ? 'translateY(0)' : 'translateY(8px)',
             transition: 'opacity 0.5s ease, transform 0.5s ease',
           }}
@@ -53,15 +69,45 @@ export default function Footer({ swUnlocked, onNavigate, onLockedClick }) {
 
         <div className="footer-links">
           {links.map((l) => (
-            <a key={l.id} className={l.id === '#starwishes' && !swUnlocked ? 'sw-locked-link' : ''}
-              onClick={() => (l.id === '#starwishes' && !swUnlocked ? onLockedClick() : onNavigate(l.id))}>
+            <a
+              key={l.id}
+              className={l.id === '#starwishes' && !swUnlocked ? 'sw-locked-link' : ''}
+              onClick={() => (l.id === '#starwishes' && !swUnlocked ? onLockedClick() : onNavigate(l.id))}
+            >
               {l.label}
             </a>
           ))}
         </div>
 
-        <p className="footer-copy">
-          Made with infinite love under the stars ✦
+        <div style={{ marginTop: '1.5rem' }}>
+          <button
+            onClick={handleSendLove}
+            style={{
+              background: 'rgba(227, 184, 234, 0.1)',
+              border: '1px solid rgba(227, 184, 234, 0.25)',
+              color: 'var(--secondary)',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '999px',
+              fontFamily: 'inherit',
+              fontSize: '0.82rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+            className="footer-love-btn"
+          >
+            <span className="material-symbols-outlined filled heartbeat" style={{ fontSize: '0.95rem', color: 'var(--error)' }}>
+              favorite
+            </span>
+            <span>Kirim Bintang Cinta ke Seluruh Semesta</span>
+          </button>
+        </div>
+
+        <p className="footer-copy" style={{ marginTop: '1.5rem', opacity: 0.55 }}>
+          Dibuat dengan cinta tak terhingga di bawah naungan rasi bintang kita ✦
         </p>
       </div>
     </footer>

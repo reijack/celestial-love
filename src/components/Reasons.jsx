@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { HERO_IMG, CARD_CAT_IMG_1, CARD_CAT_IMG_2, CARD_CAT_IMG_3 } from '../content'
 import { spawnHearts } from '../hooks'
-import { playStarChime, playHeartPop } from '../sound'
+import { playStarChime, playHeartPop, playLetterUnfold } from '../sound'
 
 const RANDOM_LOVE_NOTES = [
   'Kamu adalah orang pertama yang kupikirkan saat membuka mata dan yang terakhir sebelum terlelap.',
@@ -10,14 +10,29 @@ const RANDOM_LOVE_NOTES = [
   'Setiap obrolan random tengah malam bersamamu adalah momen paling berharga dalam hariku.',
   'Terima kasih telah menjadi rumah tempat hatiku selalu ingin pulang.',
   'Suara tawamu adalah melodi terindah yang tak pernah bosan kudengar berulang-ulang.',
-  'Bersamamu, hari-hari biasa selalu terasa seperti petualangan magis.',
+  'Bersamamu, hari-hari biasa selalu terasa seperti petualangan magis penuh keajaiban.',
   'Aku jatuh cinta pada caramu melihat dunia dengan penuh kehangatan dan kebaikan.',
+  'Di matamu, aku menemukan tempat terdamai yang tak pernah kutemukan di mana pun.',
+  'Genggaman tanganmu adalah pengingat bahwa aku tidak pernah sendirian mengarungi badai apa pun.',
+  'Bahkan di hari paling mendung sekalipun, bayangan tawamu sanggup menyalakan pelangi di hatiku.',
+  'Terima kasih sudah memilihku setiap hari, sebagaimana aku selalu memilihmu tanpa ragu.',
 ]
+
+const SECRET_WHISPERS = {
+  1: 'Rahasia kecil: Aku selalu tersenyum sendiri tiap ingat betapa lucunya awal mula kita saling confess lewat Google Form.',
+  2: 'Rahasia kecil: Obrolan tengah malam kita selalu jadi alasan aku tidur dengan hati yang tenang dan mimpi indah.',
+  3: 'Rahasia kecil: Tiap kali kamu ngusap kepalaku, rasanya duniaku langsung berhenti berputar sejenak.',
+  4: 'Rahasia kecil: Lagu-lagu di playlist kita selalu kuputar saat aku lagi kangen berat sama kamu.',
+  5: 'Rahasia kecil: Tawamu itu candu terbaikku. Bikin hari seberat apa pun jadi ringan seketika.',
+  6: 'Rahasia kecil: Di mana pun kita berada, selama ada kamu, tempat itu selalu terasa seperti rumah.',
+}
 
 export default function Reasons() {
   const [noteModal, setNoteModal] = useState(false)
   const [currentNote, setCurrentNote] = useState('')
-  const [cardLikes, setCardLikes] = useState({ 1: 24, 2: 18, 3: 15, 4: 21, 5: 32, 6: 28 })
+  const [copiedNote, setCopiedNote] = useState(false)
+  const [revealedSecrets, setRevealedSecrets] = useState({})
+  const [cardLikes, setCardLikes] = useState({ 1: 28, 2: 22, 3: 19, 4: 25, 5: 36, 6: 31 })
 
   function handleRandomNote(e) {
     const random = RANDOM_LOVE_NOTES[Math.floor(Math.random() * RANDOM_LOVE_NOTES.length)]
@@ -37,10 +52,24 @@ export default function Reasons() {
     spawnHearts(e.clientX, e.clientY)
   }
 
+  function copyNote() {
+    navigator.clipboard?.writeText(currentNote)
+    setCopiedNote(true)
+    playHeartPop()
+    setTimeout(() => setCopiedNote(false), 2000)
+  }
+
   function likeBento(id, e) {
     e.stopPropagation()
     setCardLikes((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }))
     playHeartPop()
+    spawnHearts(e.clientX, e.clientY)
+  }
+
+  function toggleSecret(id, e) {
+    e.stopPropagation()
+    setRevealedSecrets((prev) => ({ ...prev, [id]: !prev[id] }))
+    playLetterUnfold()
     spawnHearts(e.clientX, e.clientY)
   }
 
@@ -50,23 +79,28 @@ export default function Reasons() {
         <aside className="reasons-sidebar reveal">
           <div className="reasons-sidebar-header">
             <div className="reasons-sidebar-avatar">
-              <span className="material-symbols-outlined" style={{ fontSize: '1.5rem', color: 'var(--on-secondary-container)' }}>pets</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '1.5rem', color: 'var(--on-secondary-container)' }}>
+                pets
+              </span>
             </div>
             <div>
-              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.125rem', color: 'var(--secondary)', fontWeight: 600 }}>Our Story</div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--on-surface-variant)', letterSpacing: '0.04em', fontWeight: 600 }}>Written in the stars ✦</div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.125rem', color: 'var(--secondary)', fontWeight: 600 }}>
+                Our Story
+              </div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--on-surface-variant)', letterSpacing: '0.04em', fontWeight: 600 }}>
+                Written in the stars ✦
+              </div>
             </div>
           </div>
 
           <p style={{ fontSize: '0.85rem', color: 'var(--on-surface-variant)', lineHeight: 1.6, margin: '0 0 1rem' }}>
-            Setiap alasan kecil yang membuat semesta kita begitu hangat dan berwarna.
+            Setiap detail kecil dan hangat yang membuat semesta cinta kita begitu sempurna.
           </p>
 
-          <button
-            className="reasons-note-btn"
-            onClick={handleRandomNote}
-          >
-            <span className="material-symbols-outlined filled" style={{ fontSize: '1.1rem', color: 'var(--secondary)' }}>auto_awesome</span>
+          <button className="reasons-note-btn" onClick={handleRandomNote}>
+            <span className="material-symbols-outlined filled" style={{ fontSize: '1.1rem', color: 'var(--secondary)' }}>
+              auto_awesome
+            </span>
             <span>Bisikan Bintang Hari Ini</span>
           </button>
 
@@ -74,7 +108,7 @@ export default function Reasons() {
             style={{
               marginTop: '0.75rem',
               width: '100%',
-              background: 'var(--surface-highest)',
+              background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.1)',
               color: 'var(--on-surface)',
               padding: '0.75rem',
@@ -94,22 +128,26 @@ export default function Reasons() {
               spawnHearts(e.clientX, e.clientY)
             }}
           >
-            <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>favorite</span>
-            <span>Kirim Cinta ✦</span>
+            <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>
+              favorite
+            </span>
+            <span>Kirim Cinta Kosmik ✦</span>
           </button>
         </aside>
 
         <main className="reasons-main">
           <header className="reveal" style={{ marginBottom: '2.5rem' }}>
             <div className="section-eyebrow" style={{ display: 'inline-flex' }}>
-              <span className="material-symbols-outlined twinkle" style={{ fontSize: '0.875rem' }}>star</span>
+              <span className="material-symbols-outlined twinkle" style={{ fontSize: '0.875rem' }}>
+                star
+              </span>
               <span>Endless Reasons</span>
             </div>
             <h1 className="text-display gradient-text" style={{ marginTop: '0.75rem' }}>
               Hal-Hal yang Kucintai Dari Kita
             </h1>
             <p className="text-body-lg" style={{ color: 'var(--on-surface-variant)', marginTop: '0.5rem', maxWidth: '42rem' }}>
-              Setiap detail kecil dan hangat yang membuat semesta kita begitu utuh dan sempurna.
+              Klik pada kartu kenangan mana pun untuk mengungkap rahasia kecil di baliknya ✦
             </p>
           </header>
 
@@ -118,7 +156,7 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal bento-span-2"
               style={{ borderRadius: '1.5rem', padding: '2.25rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
-              onClick={(e) => likeBento(1, e)}
+              onClick={(e) => toggleSecret(1, e)}
             >
               <img
                 className="card-cat-peek"
@@ -126,9 +164,8 @@ export default function Reasons() {
                 src={CARD_CAT_IMG_1}
                 style={{ top: '-2rem', right: '-1rem', width: '5.25rem', height: '5.25rem', borderWidth: '3px' }}
               />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right,rgba(227,184,234,0.1),rgba(194,194,242,0.03))', borderRadius: '1.5rem', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <div className="reason-icon reason-icon-secondary" style={{ width: '3rem', height: '3rem', marginBottom: 0 }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>air</span>
@@ -137,10 +174,15 @@ export default function Reasons() {
                       <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>water_drop</span>
                     </div>
                   </div>
-                  <span className="bento-like-badge">
-                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
-                    <span>{cardLikes[1]}</span>
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span className="bento-like-badge" onClick={(e) => likeBento(1, e)} title="Beri cinta">
+                      <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                      <span>{cardLikes[1]}</span>
+                    </span>
+                    <span className="bento-like-badge" style={{ color: 'var(--secondary)' }}>
+                      {revealedSecrets[1] ? '✦ Rahasia Terbuka' : '🔍 Klik untuk Rahasia'}
+                    </span>
+                  </div>
                 </div>
                 <div>
                   <h3 className="reason-card-title" style={{ color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -149,6 +191,11 @@ export default function Reasons() {
                   <p className="reason-card-text">
                     Libra (26 Agustus) dan Aquarius (14 Februari) — dua rasi elemen udara yang ditakdirkan saling melengkapi. Cara kita menyeimbangkan rasa dan berjalan beriringan adalah keajaiban nyata.
                   </p>
+                  {revealedSecrets[1] && (
+                    <div style={{ marginTop: '0.9rem', padding: '0.75rem 1rem', background: 'rgba(227,184,234,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(227,184,234,0.3)', fontSize: '0.88rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                      💌 {SECRET_WHISPERS[1]}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -157,15 +204,14 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal reveal-delay-1"
               style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
-              onClick={(e) => likeBento(2, e)}
+              onClick={(e) => toggleSecret(2, e)}
             >
-              <div style={{ position: 'absolute', top: 0, right: 0, width: '16rem', height: '16rem', background: 'rgba(194,194,242,0.1)', borderRadius: '9999px', filter: 'blur(3rem)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                   <div className="reason-icon reason-icon-primary" style={{ marginBottom: 0 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>dark_mode</span>
                   </div>
-                  <span className="bento-like-badge">
+                  <span className="bento-like-badge" onClick={(e) => likeBento(2, e)}>
                     <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
                     <span>{cardLikes[2]}</span>
                   </span>
@@ -175,6 +221,11 @@ export default function Reasons() {
                   <p className="reason-card-text">
                     Saat seisi dunia telah terlelap dan hanya suara kita yang saling berbagi cerita rahasia pada taburan bintang.
                   </p>
+                  {revealedSecrets[2] && (
+                    <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(194,194,242,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(194,194,242,0.3)', fontSize: '0.85rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                      💌 {SECRET_WHISPERS[2]}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -183,7 +234,7 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal reveal-delay-2"
               style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
-              onClick={(e) => likeBento(3, e)}
+              onClick={(e) => toggleSecret(3, e)}
             >
               <img
                 className="card-cat-peek"
@@ -196,7 +247,7 @@ export default function Reasons() {
                   <div className="reason-icon reason-icon-secondary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>coffee</span>
                   </div>
-                  <span className="bento-like-badge">
+                  <span className="bento-like-badge" onClick={(e) => likeBento(3, e)}>
                     <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
                     <span>{cardLikes[3]}</span>
                   </span>
@@ -205,6 +256,11 @@ export default function Reasons() {
                 <p className="reason-card-text-sm">
                   Bagaimana kamu selalu paham hal-hal kecil yang kubutuhkan bahkan sebelum aku sempat mengucapkannya.
                 </p>
+                {revealedSecrets[3] && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(227,184,234,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(227,184,234,0.3)', fontSize: '0.85rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                    💌 {SECRET_WHISPERS[3]}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -212,14 +268,14 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal reveal-delay-3"
               style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
-              onClick={(e) => likeBento(4, e)}
+              onClick={(e) => toggleSecret(4, e)}
             >
               <div style={{ position: 'relative', zIndex: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <div className="reason-icon reason-icon-tertiary" style={{ width: '2.5rem', height: '2.5rem', marginBottom: 0 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>music_note</span>
                   </div>
-                  <span className="bento-like-badge">
+                  <span className="bento-like-badge" onClick={(e) => likeBento(4, e)}>
                     <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
                     <span>{cardLikes[4]}</span>
                   </span>
@@ -228,6 +284,11 @@ export default function Reasons() {
                 <p className="reason-card-text-sm">
                   Setiap alunan nada di playlist kita menyimpan kenangan manis yang merajut perjalanan cinta kita.
                 </p>
+                {revealedSecrets[4] && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(184,195,255,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(184,195,255,0.3)', fontSize: '0.85rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                    💌 {SECRET_WHISPERS[4]}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -235,9 +296,8 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal reveal-delay-1"
               style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer' }}
-              onClick={(e) => likeBento(5, e)}
+              onClick={(e) => toggleSecret(5, e)}
             >
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right,transparent,rgba(194,194,242,0.06))', borderRadius: '1.5rem', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <div
                   style={{
@@ -261,6 +321,11 @@ export default function Reasons() {
                 <p className="reason-card-text" style={{ textAlign: 'center' }}>
                   Suara tawa yang selalu berhasil menerangi hari-hari tergelapku dan menghangatkan jiwa.
                 </p>
+                {revealedSecrets[5] && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(255,184,215,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(255,184,215,0.3)', fontSize: '0.85rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                    💌 {SECRET_WHISPERS[5]}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -268,7 +333,7 @@ export default function Reasons() {
             <div
               className="glass-card constellation-bg reveal reveal-delay-2 bento-span-2"
               style={{ borderRadius: '1.5rem', padding: '2rem', position: 'relative', overflow: 'visible', cursor: 'pointer' }}
-              onClick={(e) => likeBento(6, e)}
+              onClick={(e) => toggleSecret(6, e)}
             >
               <img
                 className="card-cat-peek"
@@ -276,7 +341,6 @@ export default function Reasons() {
                 src={CARD_CAT_IMG_3}
                 style={{ bottom: '-1.5rem', right: '2rem', width: '4.5rem', height: '4.5rem', borderWidth: '3px' }}
               />
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '2px', background: 'linear-gradient(to right,var(--secondary),var(--primary),transparent)', opacity: 0.4, borderRadius: '1.5rem 1.5rem 0 0' }} />
               <div style={{ position: 'relative', zIndex: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -285,14 +349,24 @@ export default function Reasons() {
                     </div>
                     <h3 className="reason-card-title-sm" style={{ marginBottom: 0 }}>Petualangan Tak Terduga</h3>
                   </div>
-                  <span className="bento-like-badge">
-                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
-                    <span>{cardLikes[6]}</span>
-                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span className="bento-like-badge" onClick={(e) => likeBento(6, e)}>
+                      <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem', color: 'var(--error)' }}>favorite</span>
+                      <span>{cardLikes[6]}</span>
+                    </span>
+                    <span className="bento-like-badge" style={{ color: 'var(--secondary)' }}>
+                      {revealedSecrets[6] ? '✦ Rahasia Terbuka' : '🔍 Klik untuk Rahasia'}
+                    </span>
+                  </div>
                 </div>
                 <p className="reason-card-text">
                   Entah itu obrolan spontan, perjalanan singkat, atau sekadar menikmati sore berdua, setiap detik bersamamu selalu terasa seperti petualangan indah.
                 </p>
+                {revealedSecrets[6] && (
+                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.85rem', background: 'rgba(227,184,234,0.12)', borderRadius: '0.85rem', border: '1px solid rgba(227,184,234,0.3)', fontSize: '0.85rem', color: 'var(--on-surface)', animation: 'page-enter 0.4s ease' }}>
+                    💌 {SECRET_WHISPERS[6]}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -338,9 +412,10 @@ export default function Reasons() {
             <p className="love-note-text">{currentNote}</p>
             <span className="love-note-quote-mark" style={{ textAlign: 'right' }}>”</span>
           </div>
-          <div className="sw-modal-actions" style={{ marginTop: '1.5rem' }}>
-            <button className="sw-btn-cancel" onClick={() => setNoteModal(false)}>
-              Tutup
+          <div className="sw-modal-actions" style={{ marginTop: '1.5rem', flexWrap: 'wrap', gap: '0.6rem' }}>
+            <button className="sw-btn-cancel" onClick={copyNote}>
+              <span className="material-symbols-outlined" style={{ fontSize: '0.95rem' }}>{copiedNote ? 'check' : 'content_copy'}</span>
+              <span>{copiedNote ? 'Tersalin ✦' : 'Salin Pesan'}</span>
             </button>
             <button className="sw-btn-save" onClick={nextRandomNote}>
               <span className="material-symbols-outlined filled" style={{ fontSize: '0.95rem' }}>refresh</span>

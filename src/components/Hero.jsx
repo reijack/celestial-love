@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { HERO_IMG } from '../content'
 import { spawnHearts } from '../hooks'
-import { playStarChime, playHeartPop } from '../sound'
+import { playStarChime, playHeartPop, playLetterUnfold } from '../sound'
 
 // Start date: 26 Agustus 2025 00:00:00 (WIB)
 const START_DATE = new Date('2025-08-26T00:00:00+07:00').getTime()
@@ -14,12 +14,17 @@ function calculateLoveTime() {
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
   const minutes = Math.floor((diff / 1000 / 60) % 60)
   const seconds = Math.floor((diff / 1000) % 60)
+  // Average resting heart rate ~72 bpm -> ~1.2 beats per second
+  const totalSeconds = Math.floor(diff / 1000)
+  const heartbeats = Math.floor(totalSeconds * 1.2).toLocaleString('id-ID')
 
-  return { days, hours, minutes, seconds }
+  return { days, hours, minutes, seconds, heartbeats }
 }
 
 export default function Hero({ onNavigate }) {
   const [time, setTime] = useState(calculateLoveTime)
+  const [hugCount, setHugCount] = useState(143)
+  const [hugToast, setHugToast] = useState(false)
   const cardRef = useRef(null)
   const [showScrollHint, setShowScrollHint] = useState(true)
 
@@ -30,12 +35,11 @@ export default function Hero({ onNavigate }) {
     return () => clearInterval(timer)
   }, [])
 
-  // Hide scroll hint on scroll
   useEffect(() => {
     function onScroll() {
-      if (window.scrollY > 100) setShowScrollHint(false)
+      if (window.scrollY > 120) setShowScrollHint(false)
     }
-    window.addEventListener('scroll', onScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -45,20 +49,29 @@ export default function Hero({ onNavigate }) {
     const rect = card.getBoundingClientRect()
     const x = e.clientX - rect.left - rect.width / 2
     const y = e.clientY - rect.top - rect.height / 2
-    const rx = -(y / (rect.height / 2)) * 5
-    const ry = (x / (rect.width / 2)) * 5
-    card.style.transform = `perspective(1200px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`
+    const rx = -(y / (rect.height / 2)) * 4.5
+    const ry = (x / (rect.width / 2)) * 4.5
+    card.style.transform = `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`
   }
 
   function handleMouseLeave() {
     if (cardRef.current) {
-      cardRef.current.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+      cardRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'
     }
   }
 
   function handleImageClick(e) {
     playStarChime()
     spawnHearts(e.clientX, e.clientY)
+  }
+
+  function handleSendHug(e) {
+    e.stopPropagation()
+    setHugCount((c) => c + 1)
+    playLetterUnfold()
+    spawnHearts(e.clientX, e.clientY)
+    setHugToast(true)
+    setTimeout(() => setHugToast(false), 2400)
   }
 
   return (
@@ -69,13 +82,17 @@ export default function Hero({ onNavigate }) {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <span className="material-symbols-outlined filled hero-deco-top twinkle" style={{ fontSize: '1.5rem' }}>stars</span>
-        <span className="material-symbols-outlined hero-deco-bottom twinkle" style={{ fontSize: '1.25rem' }}>flare</span>
+        <span className="material-symbols-outlined filled hero-deco-top twinkle" style={{ fontSize: '1.5rem' }}>
+          stars
+        </span>
+        <span className="material-symbols-outlined hero-deco-bottom twinkle" style={{ fontSize: '1.25rem' }}>
+          flare
+        </span>
 
-        {/* Zodiac Harmony Tag */}
+        {/* Zodiac Harmony Tag with Live Constellation Badge */}
         <div className="hero-zodiac-badge reveal">
           <span className="hero-zodiac-icon">♎</span>
-          <span>Libra &amp; Aquarius Harmony</span>
+          <span>Libra &amp; Aquarius • 100% Celestial Harmony</span>
           <span className="hero-zodiac-icon">♒</span>
         </div>
 
@@ -83,12 +100,12 @@ export default function Hero({ onNavigate }) {
         <div
           className="hero-img-wrap"
           onClick={handleImageClick}
-          title="Klik untuk mengirim pelukan cinta ✦"
+          title="Klik untuk mengirim sentuhan bintang ✦"
           style={{ cursor: 'pointer' }}
         >
           <div className="hero-img-glow" />
 
-          {/* Orbit Rings */}
+          {/* Dual Orbit Rings */}
           <div className="hero-orbit-ring">
             <div className="hero-orbit-dot" />
           </div>
@@ -98,7 +115,9 @@ export default function Hero({ onNavigate }) {
 
           <img className="hero-img" src={HERO_IMG} alt="Cute celestial cat with heart balloon" />
           <div className="hero-img-badge floating-element">
-            <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>favorite</span>
+            <span className="material-symbols-outlined filled" style={{ fontSize: '1rem', color: 'var(--error)' }}>
+              favorite
+            </span>
           </div>
         </div>
 
@@ -118,7 +137,9 @@ export default function Hero({ onNavigate }) {
           style={{ cursor: 'pointer' }}
         >
           <div className="hero-counter-label">
-            <span className="material-symbols-outlined filled" style={{ fontSize: '0.875rem', color: 'var(--secondary)' }}>auto_awesome</span>
+            <span className="material-symbols-outlined filled" style={{ fontSize: '0.875rem', color: 'var(--secondary)' }}>
+              auto_awesome
+            </span>
             <span>Telah Menjalin Kasih Selama</span>
           </div>
           <div className="hero-counter-grid">
@@ -142,6 +163,48 @@ export default function Hero({ onNavigate }) {
               <span className="hero-counter-unit">Detik</span>
             </div>
           </div>
+
+          {/* Interactive Heartbeat & Hug stats */}
+          <div
+            style={{
+              marginTop: '0.9rem',
+              paddingTop: '0.75rem',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.74rem',
+              color: 'var(--on-surface-variant)',
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <span className="material-symbols-outlined filled heartbeat" style={{ fontSize: '0.9rem', color: 'var(--error)' }}>
+                favorite
+              </span>
+              <span>~{time.heartbeats} Detak Jantung Bersama</span>
+            </span>
+            <button
+              style={{
+                background: 'rgba(227,184,234,0.12)',
+                border: '1px solid rgba(227,184,234,0.3)',
+                color: 'var(--secondary)',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '999px',
+                fontSize: '0.72rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                transition: 'all 0.25s',
+              }}
+              onClick={handleSendHug}
+              title="Kirim pelukan hangat jarak jauh ✦"
+            >
+              <span>🤗 Kirim Pelukan</span>
+              <span style={{ opacity: 0.8 }}>({hugCount})</span>
+            </button>
+          </div>
         </div>
 
         <div className="hero-actions reveal reveal-delay-3">
@@ -153,7 +216,9 @@ export default function Hero({ onNavigate }) {
             }}
           >
             <span>Jelajahi Kisah Kita</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>arrow_forward</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+              arrow_forward
+            </span>
           </button>
           <button
             className="btn-celestial-secondary"
@@ -162,7 +227,9 @@ export default function Hero({ onNavigate }) {
               onNavigate('#letter')
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>mail</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
+              mail
+            </span>
             <span>Buka Surat</span>
           </button>
         </div>
@@ -170,10 +237,17 @@ export default function Hero({ onNavigate }) {
         {/* Scroll Hint */}
         {showScrollHint && (
           <div className="scroll-hint">
-            <span className="material-symbols-outlined" style={{ fontSize: '1.25rem', animation: 'scroll-hint-bounce 2s ease-in-out infinite' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
               keyboard_arrow_down
             </span>
             <span>Scroll ke bawah</span>
+          </div>
+        )}
+
+        {/* Hug Toast Notification */}
+        {hugToast && (
+          <div className="sw-toast show" style={{ bottom: '2rem' }}>
+            Pelukan kosmik hangat berhasil terkirim ke hatinya ✦
           </div>
         )}
       </div>
