@@ -1,15 +1,5 @@
 import { useEffect, useRef } from 'react'
 
-// Smooth noise generator for organic movement
-function smoothNoise(x) {
-  const ix = Math.floor(x)
-  const fx = x - ix
-  const t = fx * fx * (3 - 2 * fx)
-  const a = Math.sin(ix * 127.1 + ix * 311.7) * 43758.5453
-  const b = Math.sin((ix + 1) * 127.1 + (ix + 1) * 311.7) * 43758.5453
-  return (a - Math.floor(a)) * (1 - t) + (b - Math.floor(b)) * t
-}
-
 export default function SkyCanvas() {
   const canvasRef = useRef(null)
 
@@ -18,15 +8,14 @@ export default function SkyCanvas() {
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })
     let raf
+
     let stars = []
+    let constellationLinks = []
     let meteors = []
     let ripples = []
     let heartStars = []
     let nebulaClouds = []
     let floatingHeartParticles = []
-    
-    // Constellation lines configuration
-    const MAX_CONSTELLATION_DIST = 95
 
     // Smooth mouse lerp
     let mouseX = 0, mouseY = 0
@@ -35,7 +24,8 @@ export default function SkyCanvas() {
     let targetRawX = -1000, targetRawY = -1000
 
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // Use 1.5 max DPR for crisp visuals without 4K GPU memory overhead
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       const w = window.innerWidth
       const h = window.innerHeight
       canvas.width = w * dpr
@@ -51,9 +41,8 @@ export default function SkyCanvas() {
     function buildStars() {
       stars = []
       const w = window.innerWidth
-      const N = w < 768 ? 160 : 280
+      const N = w < 768 ? 110 : 180
       const starColors = [
-        '255,255,255',
         '255,255,255',
         '255,250,240',
         '230,210,255',
@@ -67,30 +56,46 @@ export default function SkyCanvas() {
         stars.push({
           x: Math.random(),
           y: Math.random(),
-          r: Math.random() * 1.8 + 0.3,
+          r: Math.random() * 1.6 + 0.4,
           color: starColors[Math.floor(Math.random() * starColors.length)],
-          depth: 0.15 + Math.random() * 0.85,
-          twinkleSpeed: 0.008 + Math.random() * 0.024,
+          depth: 0.2 + Math.random() * 0.8,
+          twinkleSpeed: 0.0015 + Math.random() * 0.003,
           twinklePhase: Math.random() * Math.PI * 2,
-          sp: 0.005 + Math.random() * 0.02,
-          noiseSeed: Math.random() * 1000,
-          isHero: Math.random() < 0.15, // 15% are bright 4-point stars
+          sp: 0.004 + Math.random() * 0.012,
+          isHero: Math.random() < 0.12,
         })
+      }
+
+      // Pre-calculate constellation pairs once to avoid O(N^2) calculations every frame
+      constellationLinks = []
+      const MAX_DIST_SQ = 0.08 * 0.08 // in normalized coords
+      for (let i = 0; i < stars.length; i += 2) {
+        if (stars[i].depth < 0.4) continue
+        for (let j = i + 1; j < Math.min(i + 8, stars.length); j++) {
+          const dx = stars[i].x - stars[j].x
+          const dy = stars[i].y - stars[j].y
+          const distSq = dx * dx + dy * dy
+          if (distSq < MAX_DIST_SQ) {
+            constellationLinks.push({
+              i1: i,
+              i2: j,
+              maxAlpha: (1 - Math.sqrt(distSq) / 0.08) * 0.16,
+            })
+          }
+        }
       }
     }
 
     function buildHeartStars() {
       heartStars = []
-      const count = window.innerWidth < 760 ? 6 : 12
+      const count = window.innerWidth < 760 ? 5 : 9
       for (let i = 0; i < count; i++) {
         heartStars.push({
           x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight * 0.85 + window.innerHeight * 0.05,
-          scale: 4.5 + Math.random() * 7,
+          y: Math.random() * window.innerHeight * 0.8 + window.innerHeight * 0.08,
+          scale: 4.5 + Math.random() * 6,
           phase: Math.random() * Math.PI * 2,
-          speed: 0.2 + Math.random() * 0.45,
-          driftX: (Math.random() - 0.5) * 0.02,
-          driftY: (Math.random() - 0.5) * 0.01,
+          speed: 0.001 + Math.random() * 0.002,
           color: i % 2 === 0 ? '227,184,234' : '255,184,205',
         })
       }
@@ -98,28 +103,22 @@ export default function SkyCanvas() {
 
     function buildNebulaClouds() {
       nebulaClouds = []
-      const count = window.innerWidth < 760 ? 5 : 8
+      const count = window.innerWidth < 760 ? 3 : 5
       const colors = [
         [227, 184, 234], // Soft Orchid
         [194, 194, 242], // Periwinkle
         [184, 195, 255], // Celestial Blue
         [255, 184, 205], // Cosmic Rose
         [184, 230, 255], // Starlight Cyan
-        [235, 175, 255], // Violet
-        [255, 210, 180], // Warm Sunset Glow
       ]
       for (let i = 0; i < count; i++) {
         nebulaClouds.push({
           x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight * 0.8,
-          r: 180 + Math.random() * 260,
+          y: Math.random() * window.innerHeight * 0.75,
+          r: 160 + Math.random() * 220,
           color: colors[i % colors.length],
           phase: Math.random() * Math.PI * 2,
-          speed: 0.08 + Math.random() * 0.18,
-          driftX: (Math.random() - 0.5) * 0.04,
-          driftY: (Math.random() - 0.5) * 0.02,
-          pulsePhase: Math.random() * Math.PI * 2,
-          pulseSpeed: 0.00015 + Math.random() * 0.00025,
+          speed: 0.0003 + Math.random() * 0.0005,
         })
       }
     }
@@ -127,32 +126,22 @@ export default function SkyCanvas() {
     function drawSparkleCross(cx, cy, r, alpha, color) {
       ctx.save()
       ctx.translate(cx, cy)
-      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 3)
-      grad.addColorStop(0, `rgba(${color},${alpha})`)
-      grad.addColorStop(0.3, `rgba(${color},${alpha * 0.6})`)
-      grad.addColorStop(1, `rgba(${color},0)`)
 
-      // Core glow
+      // Core
       ctx.beginPath()
-      ctx.arc(0, 0, r * 1.6, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(${color},${alpha * 0.8})`
+      ctx.arc(0, 0, r * 1.5, 0, Math.PI * 2)
+      ctx.fillStyle = `rgba(${color},${alpha * 0.9})`
       ctx.fill()
 
-      // Horizontal ray
+      // Cross rays
+      ctx.strokeStyle = `rgba(${color},${alpha * 0.5})`
+      ctx.lineWidth = 1
       ctx.beginPath()
-      ctx.moveTo(-r * 4.5, 0)
-      ctx.quadraticCurveTo(0, -r * 0.35, r * 4.5, 0)
-      ctx.quadraticCurveTo(0, r * 0.35, -r * 4.5, 0)
-      ctx.fillStyle = grad
-      ctx.fill()
-
-      // Vertical ray
-      ctx.beginPath()
-      ctx.moveTo(0, -r * 4.5)
-      ctx.quadraticCurveTo(-r * 0.35, 0, 0, r * 4.5)
-      ctx.quadraticCurveTo(r * 0.35, 0, 0, -r * 4.5)
-      ctx.fillStyle = grad
-      ctx.fill()
+      ctx.moveTo(-r * 3.5, 0)
+      ctx.lineTo(r * 3.5, 0)
+      ctx.moveTo(0, -r * 3.5)
+      ctx.lineTo(0, r * 3.5)
+      ctx.stroke()
 
       ctx.restore()
     }
@@ -170,27 +159,20 @@ export default function SkyCanvas() {
       ctx.bezierCurveTo(11, 3.5, 11, -3, 6, -3)
       ctx.bezierCurveTo(2, -3, 0, 1, 0, 3)
       ctx.closePath()
-      
-      // Heart fill with soft glow
-      ctx.fillStyle = `rgba(${color},${alpha * 0.65})`
-      ctx.shadowColor = `rgba(${color},${alpha * 0.85})`
-      ctx.shadowBlur = 14 * (scale / 10)
-      ctx.fill()
 
-      // Inner highlight
-      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.3})`
+      ctx.fillStyle = `rgba(${color},${alpha * 0.6})`
       ctx.fill()
       ctx.restore()
     }
 
     function spawnMeteor() {
-      const fromTop = Math.random() < 0.65
+      const fromTop = Math.random() < 0.7
       const startX = fromTop ? Math.random() * window.innerWidth * 0.9 : Math.random() * window.innerWidth * 0.25
-      const startY = fromTop ? -40 : Math.random() * window.innerHeight * 0.25
+      const startY = fromTop ? -30 : Math.random() * window.innerHeight * 0.25
       const angle = (32 + Math.random() * 18) * (Math.PI / 180)
-      const speed = 10 + Math.random() * 14
-      const isGolden = Math.random() < 0.25
-      const isViolet = Math.random() < 0.35
+      const speed = 10 + Math.random() * 12
+      const isGolden = Math.random() < 0.3
+      const isViolet = Math.random() < 0.4
 
       const headColor = isGolden ? '255,235,170' : isViolet ? '230,185,255' : '185,225,255'
       const tailColor = isGolden ? '255,190,120' : isViolet ? '220,140,250' : '160,195,255'
@@ -200,33 +182,24 @@ export default function SkyCanvas() {
         y: startY,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        len: 150 + Math.random() * 180,
+        len: 140 + Math.random() * 140,
         life: 1,
-        decay: 0.007 + Math.random() * 0.006,
-        trailWidth: 1.8 + Math.random() * 1.5,
+        decay: 0.009 + Math.random() * 0.006,
+        trailWidth: 1.6 + Math.random() * 1.2,
         headColor,
         tailColor,
-        sparks: [],
       })
-    }
-
-    function spawnMeteorBurst() {
-      const count = 2 + Math.floor(Math.random() * 3)
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => spawnMeteor(), i * 180)
-      }
     }
 
     let meteorTimeout
     function scheduleMeteor() {
       meteorTimeout = setTimeout(() => {
-        if (Math.random() < 0.22) {
-          spawnMeteorBurst()
-        } else {
-          spawnMeteor()
+        spawnMeteor()
+        if (Math.random() < 0.25) {
+          setTimeout(spawnMeteor, 200)
         }
         scheduleMeteor()
-      }, 2400 + Math.random() * 4500)
+      }, 2600 + Math.random() * 4000)
     }
     scheduleMeteor()
 
@@ -234,51 +207,23 @@ export default function SkyCanvas() {
       const W = window.innerWidth, H = window.innerHeight
       for (let i = meteors.length - 1; i >= 0; i--) {
         const m = meteors[i]
-
-        // Add trailing stardust sparkles
-        if (m.life > 0.2 && Math.random() < 0.6) {
-          m.sparks.push({
-            x: m.x + (Math.random() - 0.5) * 6,
-            y: m.y + (Math.random() - 0.5) * 6,
-            alpha: m.life * 0.6,
-            r: 0.8 + Math.random() * 1.4,
-            decay: 0.03 + Math.random() * 0.02,
-          })
-        }
-
         m.x += m.vx
         m.y += m.vy
         m.life -= m.decay
 
-        if (m.life <= 0 || m.x > W + 250 || m.y > H + 250) {
+        if (m.life <= 0 || m.x > W + 200 || m.y > H + 200) {
           meteors.splice(i, 1)
           continue
-        }
-
-        // Draw Sparks
-        for (let j = m.sparks.length - 1; j >= 0; j--) {
-          const sp = m.sparks[j]
-          sp.alpha -= sp.decay
-          if (sp.alpha <= 0) {
-            m.sparks.splice(j, 1)
-            continue
-          }
-          ctx.beginPath()
-          ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${m.tailColor},${sp.alpha})`
-          ctx.fill()
         }
 
         const hyp = Math.hypot(m.vx, m.vy)
         const tailX = m.x - m.vx * (m.len / hyp)
         const tailY = m.y - m.vy * (m.len / hyp)
 
-        // Gradient Trail with multi-stop glowing taper
         const grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY)
-        grad.addColorStop(0, `rgba(255,255,255,${0.98 * m.life})`)
-        grad.addColorStop(0.1, `rgba(${m.headColor},${0.9 * m.life})`)
-        grad.addColorStop(0.35, `rgba(${m.tailColor},${0.65 * m.life})`)
-        grad.addColorStop(0.7, `rgba(184,195,255,${0.25 * m.life})`)
+        grad.addColorStop(0, `rgba(255,255,255,${0.95 * m.life})`)
+        grad.addColorStop(0.15, `rgba(${m.headColor},${0.85 * m.life})`)
+        grad.addColorStop(0.45, `rgba(${m.tailColor},${0.55 * m.life})`)
         grad.addColorStop(1, 'rgba(194,194,242,0)')
 
         ctx.strokeStyle = grad
@@ -292,50 +237,35 @@ export default function SkyCanvas() {
         // Glowing Star Head
         ctx.beginPath()
         ctx.fillStyle = `rgba(255,255,255,${m.life})`
-        ctx.shadowColor = `rgba(${m.headColor},${m.life * 0.9})`
-        ctx.shadowBlur = 14
-        ctx.arc(m.x, m.y, 2.6 * m.life, 0, Math.PI * 2)
+        ctx.arc(m.x, m.y, 2.2 * m.life, 0, Math.PI * 2)
         ctx.fill()
-        ctx.shadowBlur = 0
       }
     }
 
     // Interactive Cosmic Ripple & Sparkles
     function handleCanvasClick(e) {
-      // Create multi-ring ripple
       ripples.push({
         x: e.clientX,
         y: e.clientY,
-        r: 4,
-        maxR: 110 + Math.random() * 50,
-        alpha: 0.85,
+        r: 3,
+        maxR: 90 + Math.random() * 40,
+        alpha: 0.8,
         color: '227,184,234',
-        width: 1.8,
-      })
-      ripples.push({
-        x: e.clientX,
-        y: e.clientY,
-        r: 2,
-        maxR: 70 + Math.random() * 30,
-        alpha: 0.6,
-        color: '184,220,255',
-        width: 1.2,
+        width: 1.5,
       })
 
-      // Spawn drifting heart particle burst
-      const burstCount = 5 + Math.floor(Math.random() * 4)
-      for (let i = 0; i < burstCount; i++) {
+      // Spawn 4 floating hearts
+      for (let i = 0; i < 4; i++) {
         const ang = Math.random() * Math.PI * 2
-        const spd = 1.2 + Math.random() * 2.8
+        const spd = 1 + Math.random() * 2.2
         floatingHeartParticles.push({
           x: e.clientX,
           y: e.clientY,
           vx: Math.cos(ang) * spd,
-          vy: Math.sin(ang) * spd - 0.8,
-          scale: 4 + Math.random() * 5,
-          alpha: 0.9,
-          decay: 0.015 + Math.random() * 0.01,
-          rot: (Math.random() - 0.5) * 0.05,
+          vy: Math.sin(ang) * spd - 0.6,
+          scale: 3.5 + Math.random() * 4.5,
+          alpha: 0.85,
+          decay: 0.016 + Math.random() * 0.01,
           color: i % 2 === 0 ? '227,184,234' : '255,184,210',
         })
       }
@@ -348,26 +278,22 @@ export default function SkyCanvas() {
       targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2
       targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2
     }
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     function drawRipples() {
       for (let i = ripples.length - 1; i >= 0; i--) {
         const rp = ripples[i]
-        rp.r += 2.2
+        rp.r += 2
         rp.alpha *= 0.94
-        if (rp.r > rp.maxR || rp.alpha < 0.015) {
+        if (rp.r > rp.maxR || rp.alpha < 0.02) {
           ripples.splice(i, 1)
           continue
         }
-        ctx.save()
         ctx.beginPath()
         ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(${rp.color},${rp.alpha * 0.5})`
+        ctx.strokeStyle = `rgba(${rp.color},${rp.alpha * 0.45})`
         ctx.lineWidth = rp.width
-        ctx.shadowColor = `rgba(${rp.color},${rp.alpha * 0.8})`
-        ctx.shadowBlur = 10
         ctx.stroke()
-        ctx.restore()
       }
 
       // Draw floating heart burst particles
@@ -388,28 +314,17 @@ export default function SkyCanvas() {
       }
     }
 
-    function drawNebulaClouds(now) {
-      const t = now * 0.001
+    function drawNebulaClouds(t) {
       nebulaClouds.forEach((cloud) => {
-        const x =
-          cloud.x +
-          Math.sin(t * cloud.speed * 0.3 + cloud.phase) * 45 +
-          Math.sin(t * cloud.speed * 0.65 + cloud.phase * 1.5) * 20
-        const y =
-          cloud.y +
-          Math.cos(t * cloud.speed * 0.25 + cloud.phase) * 30 +
-          Math.cos(t * cloud.speed * 0.55 + cloud.phase * 2.2) * 15
+        const x = cloud.x + Math.sin(t * cloud.speed + cloud.phase) * 30
+        const y = cloud.y + Math.cos(t * cloud.speed * 0.8 + cloud.phase) * 20
+        const px = x + mouseX * 8
+        const py = y + mouseY * 5
+        const r = cloud.r
 
-        const breathe = 0.88 + 0.12 * Math.sin(now * cloud.pulseSpeed + cloud.pulsePhase)
-        const px = x + mouseX * 12
-        const py = y + mouseY * 8
-        const r = cloud.r * breathe
-
-        // Outer smooth aura
         const grad = ctx.createRadialGradient(px, py, 0, px, py, r)
-        grad.addColorStop(0, `rgba(${cloud.color.join(',')},0.048)`)
-        grad.addColorStop(0.35, `rgba(${cloud.color.join(',')},0.03)`)
-        grad.addColorStop(0.7, `rgba(${cloud.color.join(',')},0.01)`)
+        grad.addColorStop(0, `rgba(${cloud.color.join(',')},0.038)`)
+        grad.addColorStop(0.5, `rgba(${cloud.color.join(',')},0.015)`)
         grad.addColorStop(1, `rgba(${cloud.color.join(',')},0)`)
 
         ctx.fillStyle = grad
@@ -451,29 +366,19 @@ export default function SkyCanvas() {
       catPath = buildCatPath()
       catStarPoints = []
       let tries = 0
-      while (catStarPoints.length < 65 && tries < 6000) {
+      while (catStarPoints.length < 50 && tries < 4000) {
         tries++
         const px = Math.random() * catLocalW, py = Math.random() * catLocalH * 0.96 + 2
         if (ctx.isPointInPath(catPath, px, py)) {
           catStarPoints.push({
             x: px,
             y: py,
-            r: 0.9 + Math.random() * 1.5,
+            r: 0.9 + Math.random() * 1.3,
             phase: Math.random() * Math.PI * 2,
-            speed: 0.6 + Math.random() * 1.1,
-            sparkle: false,
+            speed: 0.001 + Math.random() * 0.002,
           })
         }
       }
-      const sparkleIdx = []
-      while (sparkleIdx.length < 8 && catStarPoints.length > 0) {
-        const ri = Math.floor(Math.random() * catStarPoints.length)
-        if (!sparkleIdx.includes(ri)) sparkleIdx.push(ri)
-      }
-      sparkleIdx.forEach((i) => {
-        catStarPoints[i].sparkle = true
-        catStarPoints[i].r = 2.2 + Math.random() * 1.4
-      })
     }
     buildCatStars()
 
@@ -485,7 +390,7 @@ export default function SkyCanvas() {
         start: performance.now(),
         duration: 24000 + Math.random() * 6000,
         y: window.innerHeight * (0.12 + Math.random() * 0.32),
-        scale: window.innerWidth / 900,
+        scale: window.innerWidth / 920,
         dir,
       }
     }
@@ -494,7 +399,7 @@ export default function SkyCanvas() {
       catTimeout = setTimeout(() => {
         spawnCat()
         scheduleCat()
-      }, 22000 + Math.random() * 16000)
+      }, 24000 + Math.random() * 16000)
     }
     scheduleCat()
     const firstCatTimeout = setTimeout(spawnCat, 3500)
@@ -510,144 +415,102 @@ export default function SkyCanvas() {
       const catW = catLocalW * catWalk.scale
       const travel = W + catW * 2
       const px = catWalk.dir === 1 ? -catW + t * travel : W + catW - t * travel
-      const bob = Math.sin(t * Math.PI * 3) * 5 * catWalk.scale
+      const bob = Math.sin(t * Math.PI * 3) * 4 * catWalk.scale
 
-      let alpha
-      if (t < 0.1) {
-        const ft = t / 0.1
-        alpha = ft * ft * (3 - 2 * ft)
-      } else if (t > 0.88) {
-        const ft = (1 - t) / 0.12
-        alpha = ft * ft * (3 - 2 * ft)
-      } else {
-        alpha = 1
-      }
-      alpha *= 0.94
+      let alpha = t < 0.1 ? t / 0.1 : t > 0.88 ? (1 - t) / 0.12 : 1
+      alpha *= 0.9
 
       ctx.save()
       ctx.translate(px, catWalk.y + bob)
       ctx.scale(catWalk.dir === 1 ? catWalk.scale : -catWalk.scale, catWalk.scale)
 
-      ctx.save()
-      ctx.shadowColor = `rgba(184,195,255,${alpha * 0.45})`
-      ctx.shadowBlur = 24
-      ctx.fillStyle = `rgba(12,11,18,${alpha * 0.94})`
+      ctx.fillStyle = `rgba(12,11,18,${alpha * 0.92})`
       ctx.fill(catPath, 'nonzero')
-      ctx.restore()
 
       catStarPoints.forEach((p) => {
-        const tw = 0.5 + 0.5 * Math.sin((now / 1000) * p.speed + p.phase)
-        const pr = p.r * (0.7 + 0.5 * tw)
-        if (p.sparkle) {
-          ctx.shadowColor = `rgba(255,255,255,${alpha * 0.8})`
-          ctx.shadowBlur = 10
-          drawSparkleCross(p.x, p.y, pr * 1.5, alpha * (0.6 + 0.4 * tw), '255,255,255')
-          ctx.shadowBlur = 0
-        } else {
-          ctx.beginPath()
-          ctx.fillStyle = `rgba(255,255,255,${alpha * (0.35 + 0.5 * tw)})`
-          ctx.arc(p.x, p.y, pr, 0, Math.PI * 2)
-          ctx.fill()
-        }
+        const tw = 0.5 + 0.5 * Math.sin(now * p.speed + p.phase)
+        ctx.beginPath()
+        ctx.fillStyle = `rgba(255,255,255,${alpha * (0.4 + 0.5 * tw)})`
+        ctx.arc(p.x, p.y, p.r * (0.7 + 0.4 * tw), 0, Math.PI * 2)
+        ctx.fill()
       })
 
-      // Cat glowing eye
-      ctx.shadowColor = `rgba(184,255,240,${alpha * 0.9})`
-      ctx.shadowBlur = 8
+      // Eye
       ctx.beginPath()
       ctx.fillStyle = `rgba(214,255,247,${alpha})`
-      ctx.arc(46, 44, 2.6, 0, Math.PI * 2)
+      ctx.arc(46, 44, 2.4, 0, Math.PI * 2)
       ctx.fill()
-      ctx.shadowBlur = 0
+
       ctx.restore()
     }
 
     function loop(now) {
       const W = window.innerWidth, H = window.innerHeight
+      const t = now || performance.now()
 
-      // Smooth mouse lerping
-      mouseX += (targetMouseX - mouseX) * 0.045
-      mouseY += (targetMouseY - mouseY) * 0.045
-      mouseRawX += (targetRawX - mouseRawX) * 0.06
-      mouseRawY += (targetRawY - mouseRawY) * 0.06
+      // Smooth mouse lerping (fast & low CPU)
+      mouseX += (targetMouseX - mouseX) * 0.05
+      mouseY += (targetMouseY - mouseY) * 0.05
+      mouseRawX += (targetRawX - mouseRawX) * 0.08
+      mouseRawY += (targetRawY - mouseRawY) * 0.08
 
       ctx.clearRect(0, 0, W, H)
 
       // 1. Mouse Cosmic Aura Spotlight
       if (mouseRawX > -100) {
-        const mouseAura = ctx.createRadialGradient(mouseRawX, mouseRawY, 0, mouseRawX, mouseRawY, 220)
-        mouseAura.addColorStop(0, 'rgba(227,184,234,0.06)')
-        mouseAura.addColorStop(0.5, 'rgba(194,194,242,0.025)')
+        const mouseAura = ctx.createRadialGradient(mouseRawX, mouseRawY, 0, mouseRawX, mouseRawY, 180)
+        mouseAura.addColorStop(0, 'rgba(227,184,234,0.045)')
+        mouseAura.addColorStop(0.6, 'rgba(194,194,242,0.015)')
         mouseAura.addColorStop(1, 'rgba(194,194,242,0)')
         ctx.fillStyle = mouseAura
         ctx.beginPath()
-        ctx.arc(mouseRawX, mouseRawY, 220, 0, Math.PI * 2)
+        ctx.arc(mouseRawX, mouseRawY, 180, 0, Math.PI * 2)
         ctx.fill()
       }
 
       // 2. Draw Nebula Clouds
-      drawNebulaClouds(now || 0)
+      drawNebulaClouds(t)
 
-      // 3. Compute star screen positions for parallax & constellation connections
-      const t = (now || 0) * 0.001
-      const starScreenPos = []
-
+      // 3. Compute Star Screen Positions
+      const starScreenPos = new Array(stars.length)
       for (let i = 0; i < stars.length; i++) {
         const p = stars[i]
-        const twBase = 0.5 + 0.5 * Math.sin(t * p.twinkleSpeed * 60 + p.twinklePhase)
-        const twNoise = smoothNoise(t * p.twinkleSpeed * 30 + p.noiseSeed)
-        const twinkle = 0.18 + 0.52 * twBase + 0.3 * twNoise
-
-        const yRaw = (p.y * H - (now || 0) * p.sp * 0.015) % H
+        const twinkle = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(t * p.twinkleSpeed + p.twinklePhase))
+        const yRaw = (p.y * H - t * p.sp) % H
         const y = yRaw < 0 ? yRaw + H : yRaw
+        const px = p.x * W + mouseX * p.depth * -8
+        const py = y + mouseY * p.depth * -5
 
-        const px = p.x * W + mouseX * p.depth * -12
-        const py = y + mouseY * p.depth * -8
-
-        starScreenPos.push({ px, py, r: p.r, color: p.color, twinkle, isHero: p.isHero, depth: p.depth })
+        starScreenPos[i] = { px, py, r: p.r, color: p.color, twinkle, isHero: p.isHero }
       }
 
-      // 4. Draw Constellation Connections between nearby stars
-      ctx.lineWidth = 0.6
-      for (let i = 0; i < starScreenPos.length; i += 2) {
-        const s1 = starScreenPos[i]
-        if (s1.depth < 0.4) continue // only foreground / mid stars connect
+      // 4. Draw Pre-calculated Constellation Lines
+      ctx.lineWidth = 0.5
+      for (let k = 0; k < constellationLinks.length; k++) {
+        const link = constellationLinks[k]
+        const s1 = starScreenPos[link.i1]
+        const s2 = starScreenPos[link.i2]
+        if (!s1 || !s2) continue
 
-        for (let j = i + 1; j < Math.min(i + 12, starScreenPos.length); j++) {
-          const s2 = starScreenPos[j]
-          const dx = s1.px - s2.px
-          const dy = s1.py - s2.py
-          const dist = Math.hypot(dx, dy)
-
-          if (dist < MAX_CONSTELLATION_DIST) {
-            const lineAlpha = (1 - dist / MAX_CONSTELLATION_DIST) * 0.12 * Math.min(s1.twinkle, s2.twinkle)
-            ctx.strokeStyle = `rgba(227,184,234,${lineAlpha})`
-            ctx.beginPath()
-            ctx.moveTo(s1.px, s1.py)
-            ctx.lineTo(s2.px, s2.py)
-            ctx.stroke()
-          }
-        }
+        const alpha = link.maxAlpha * Math.min(s1.twinkle, s2.twinkle)
+        ctx.strokeStyle = `rgba(227,184,234,${alpha})`
+        ctx.beginPath()
+        ctx.moveTo(s1.px, s1.py)
+        ctx.lineTo(s2.px, s2.py)
+        ctx.stroke()
       }
 
-      // 5. Draw Stars
+      // 5. Draw Stars (Optimized batch rendering)
       for (let i = 0; i < starScreenPos.length; i++) {
         const s = starScreenPos[i]
 
-        if (s.isHero && s.r > 1.2) {
-          drawSparkleCross(s.px, s.py, s.r * 1.3, s.twinkle * 0.75, s.color)
+        if (s.isHero && s.r > 1.1) {
+          drawSparkleCross(s.px, s.py, s.r * 1.2, s.twinkle * 0.7, s.color)
         } else {
           ctx.beginPath()
           ctx.arc(s.px, s.py, s.r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${s.color},${s.twinkle * 0.7})`
+          ctx.fillStyle = `rgba(${s.color},${s.twinkle * 0.65})`
           ctx.fill()
-
-          if (s.r > 1.1) {
-            ctx.beginPath()
-            ctx.arc(s.px, s.py, s.r * 2.8, 0, Math.PI * 2)
-            ctx.fillStyle = `rgba(${s.color},${s.twinkle * 0.08})`
-            ctx.fill()
-          }
         }
       }
 
@@ -658,19 +521,17 @@ export default function SkyCanvas() {
       // 7. Draw Floating Heart Constellations
       heartStars.forEach((hs) => {
         const tw = 0.5 + 0.5 * Math.sin(t * hs.speed + hs.phase)
-        const tw2 = smoothNoise(t * hs.speed * 0.5 + hs.phase)
-        const combined = 0.6 * tw + 0.4 * tw2
         drawHeart(
-          hs.x + Math.sin(t * 0.12 + hs.phase) * 4,
-          hs.y + Math.cos(t * 0.09 + hs.phase) * 3,
-          hs.scale * (0.85 + 0.25 * combined),
-          combined,
+          hs.x + Math.sin(t * 0.0008 + hs.phase) * 3,
+          hs.y + Math.cos(t * 0.0006 + hs.phase) * 2,
+          hs.scale * (0.85 + 0.25 * tw),
+          tw,
           hs.color
         )
       })
 
       // 8. Draw Celestial Cat
-      drawCat(now || performance.now())
+      drawCat(t)
 
       raf = requestAnimationFrame(loop)
     }

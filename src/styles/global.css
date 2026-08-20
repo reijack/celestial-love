@@ -1126,17 +1126,25 @@ section { max-width: 1100px; margin: 0 auto; padding: 7rem 1.5rem 3.5rem; }
 .spotify-embed-wrap { border-radius: 1rem; overflow: hidden; min-height: 80px; position: relative; }
 .spotify-embed-wrap iframe { width: 100%; border: none; display: block; }
 
-/* ═══ CURSOR ═══ */
-html.custom-cursor-active, html.custom-cursor-active * { cursor: none !important; }
-.cc-dot {
-  position: fixed; top: 0; left: 0; width: 6px; height: 6px; border-radius: 50%;
-  background: #ffffff; pointer-events: none; z-index: 600; opacity: 0;
-  transition: opacity 0.25s, width 0.2s, height 0.2s, background 0.2s;
-  box-shadow: 0 0 10px rgba(255,255,255,0.9), 0 0 20px rgba(227,184,234,0.4);
+/* ═══ CELESTIAL CURSOR TRAIL ═══ */
+.cc-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 599;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.15s ease-out;
+  border: 1px dashed rgba(227, 184, 234, 0.45);
+  box-shadow: 0 0 12px rgba(227, 184, 234, 0.3);
 }
-.cc-dot.cc-hover { width: 10px; height: 10px; background: var(--secondary); box-shadow: 0 0 14px rgba(227,184,234,1), 0 0 28px rgba(194,194,242,0.5); }
-.cc-glow { position: fixed; top: 0; left: 0; width: 40px; height: 40px; pointer-events: none; z-index: 599; opacity: 0; transition: opacity 0.3s; }
-.cc-glow svg polygon { transition: fill 0.25s, filter 0.25s; filter: drop-shadow(0 0 12px rgba(194,194,242,0.8)); }
+.cc-glow.cc-hover {
+  border-color: rgba(255, 184, 215, 0.8);
+  box-shadow: 0 0 18px rgba(227, 184, 234, 0.6);
+}
 
 /* ═══ HEARTS ═══ */
 .heart-particle { position: fixed; z-index: 300; color: var(--error); pointer-events: none; animation: heart-float 1s ease-out forwards; }
