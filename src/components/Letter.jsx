@@ -1,16 +1,31 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { LETTERS, LETTER_CAT_IMG } from '../content'
 import { spawnHearts } from '../hooks'
-import { playLetterUnfold, playHeartPop, playStarChime } from '../sound'
+import { playLetterUnfold, playHeartPop, playStarChime, playWishSavedSound } from '../sound'
 
 export default function Letter() {
   const [isOpen, setIsOpen] = useState(true)
   const [activeTab, setActiveTab] = useState(0)
   const [copied, setCopied] = useState(false)
   const [heartSaved, setHeartSaved] = useState(false)
+  const [showReplyModal, setShowReplyModal] = useState(false)
+  const [replyText, setReplyText] = useState('')
+  const [savedReplies, setSavedReplies] = useState(() => {
+    try {
+      const saved = localStorage.getItem('celestial_love_replies')
+      if (saved) return JSON.parse(saved)
+    } catch (_) {}
+    return []
+  })
   const cardRef = useRef(null)
 
   const currentLetter = LETTERS[activeTab] || LETTERS[0]
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('celestial_love_replies', JSON.stringify(savedReplies))
+    } catch (_) {}
+  }, [savedReplies])
 
   function handleMouseMove(e) {
     const el = cardRef.current
@@ -58,6 +73,20 @@ export default function Letter() {
     playHeartPop()
     spawnHearts(e.clientX, e.clientY)
     setTimeout(() => setHeartSaved(false), 2500)
+  }
+
+  function handleSaveReply(e) {
+    if (!replyText.trim()) return
+    const newReply = {
+      id: Date.now(),
+      text: replyText.trim(),
+      date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    }
+    setSavedReplies([newReply, ...savedReplies])
+    setReplyText('')
+    setShowReplyModal(false)
+    playWishSavedSound()
+    spawnHearts(e.clientX, e.clientY)
   }
 
   return (
@@ -194,7 +223,21 @@ export default function Letter() {
                   </span>
                   <span>Ditulis dengan Ketulusan Hati ✦</span>
                 </div>
-                <div className="letter-footer-buttons">
+                <div className="letter-footer-buttons" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <button
+                    className="letter-footer-btn"
+                    onClick={(e) => {
+                      setShowReplyModal(true)
+                      playStarChime()
+                      spawnHearts(e.clientX, e.clientY)
+                    }}
+                    style={{ background: 'rgba(227, 184, 234, 0.15)', borderColor: 'rgba(227, 184, 234, 0.35)' }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: 'var(--secondary)' }}>
+                      edit_heart
+                    </span>
+                    <span>Balas Surat Cinta</span>
+                  </button>
                   <button className="letter-footer-btn" onClick={copyLetterText}>
                     <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
                       {copied ? 'check' : 'content_copy'}
@@ -212,9 +255,79 @@ export default function Letter() {
                   </button>
                 </div>
               </div>
+
+              {/* Display Partner Saved Replies Keepsake */}
+              {savedReplies.length > 0 && (
+                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 700, color: 'var(--secondary)', marginBottom: '0.9rem' }}>
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '1.1rem' }}>favorite</span>
+                    <span>Balasan &amp; Catatan Cinta Kamu ({savedReplies.length})</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {savedReplies.map((r) => (
+                      <div
+                        key={r.id}
+                        style={{
+                          background: 'rgba(19, 18, 25, 0.7)',
+                          border: '1px solid rgba(227, 184, 234, 0.2)',
+                          borderRadius: '1rem',
+                          padding: '1rem 1.25rem',
+                        }}
+                      >
+                        <div style={{ fontSize: '0.72rem', color: 'var(--on-surface-variant)', marginBottom: '0.35rem' }}>
+                          {r.date}
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.94rem', color: 'var(--on-surface)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                          "{r.text}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </article>
         )}
+      </div>
+
+      {/* Reply Modal */}
+      <div
+        className={`sw-modal-backdrop ${showReplyModal ? 'open' : ''}`}
+        onClick={(e) => e.target === e.currentTarget && setShowReplyModal(false)}
+      >
+        <div className="sw-modal love-note-modal" style={{ maxWidth: '32rem' }}>
+          <button className="sw-modal-close" onClick={() => setShowReplyModal(false)}>
+            <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>close</span>
+          </button>
+          <div className="sw-modal-star">
+            <span className="material-symbols-outlined filled heartbeat" style={{ fontSize: '2.2rem', color: 'var(--secondary)' }}>
+              favorite
+            </span>
+          </div>
+          <h3 className="gradient-text">Tulis Balasan Surat Cinta</h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--on-surface-variant)', marginTop: '0.3rem' }}>
+            Tuliskan perasaan hatimu, pesan ini akan tersimpan abadi di semesta kita ✦
+          </p>
+
+          <textarea
+            className="sw-textarea"
+            placeholder="Tuliskan pesan manismu di sini..."
+            rows={4}
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            style={{ marginTop: '1rem' }}
+          />
+
+          <div className="sw-modal-actions" style={{ marginTop: '1.25rem' }}>
+            <button className="sw-btn-cancel" onClick={() => setShowReplyModal(false)}>
+              Batal
+            </button>
+            <button className="sw-btn-save" onClick={handleSaveReply} disabled={!replyText.trim()}>
+              <span className="material-symbols-outlined filled" style={{ fontSize: '0.95rem' }}>send</span>
+              <span>Simpan Pesan Cinta</span>
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )

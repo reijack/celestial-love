@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { spawnHearts } from '../hooks'
-import { toggleMute, getMuteState, playHeartPop, playStarChime } from '../sound'
+import { toggleMute, getMuteState, playHeartPop, playStarChime, playShootingStarSound } from '../sound'
 
 const LINKS = [
   { id: '#hero', label: 'Home', icon: 'home' },
@@ -12,6 +12,7 @@ const LINKS = [
 
 export default function Nav({ active, swUnlocked, onNavigate, onUnlockStarWishes }) {
   const [muted, setMuted] = useState(getMuteState)
+  const [meteorActive, setMeteorActive] = useState(false)
 
   function handleClick(id) {
     if (id === '#starwishes' && !swUnlocked) {
@@ -29,6 +30,15 @@ export default function Nav({ active, swUnlocked, onNavigate, onUnlockStarWishes
     if (!nextMuted) {
       playStarChime()
     }
+  }
+
+  function handleTriggerMeteorShower(e) {
+    playShootingStarSound()
+    playStarChime()
+    spawnHearts(e.clientX, e.clientY)
+    window.dispatchEvent(new CustomEvent('celestial:meteor_shower'))
+    setMeteorActive(true)
+    setTimeout(() => setMeteorActive(false), 3000)
   }
 
   return (
@@ -64,6 +74,30 @@ export default function Nav({ active, swUnlocked, onNavigate, onUnlockStarWishes
           </div>
 
           <div className="nav-actions">
+            {/* Meteor Shower Easter Egg Trigger */}
+            <button
+              title="Hujan Meteor Harapan 🌠"
+              style={{
+                background: meteorActive ? 'rgba(227, 184, 234, 0.25)' : 'rgba(255,255,255,0.06)',
+                border: '1px solid var(--outline)',
+                borderRadius: '50%',
+                color: 'var(--secondary)',
+                cursor: 'pointer',
+                width: '2.4rem',
+                height: '2.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                boxShadow: meteorActive ? '0 0 16px rgba(227, 184, 234, 0.6)' : 'none',
+              }}
+              onClick={handleTriggerMeteorShower}
+            >
+              <span className="material-symbols-outlined filled" style={{ fontSize: '1.15rem' }}>
+                flare
+              </span>
+            </button>
+
             {/* Audio Synth Mute / Unmute Button */}
             <button
               title={muted ? 'Aktifkan Suara Efek ✦' : 'Bisukan Suara Efek'}

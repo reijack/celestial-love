@@ -1,6 +1,8 @@
 // Pure Web Audio API Sound Synthesizer for Celestial Effects (No external assets needed)
 let audioCtx = null
 let isMuted = false
+let ambientInterval = null
+let ambientGainNode = null
 
 function getAudioContext() {
   if (typeof window === 'undefined') return null
@@ -18,6 +20,9 @@ function getAudioContext() {
 
 export function toggleMute() {
   isMuted = !isMuted
+  if (isMuted && ambientGainNode) {
+    ambientGainNode.gain.setValueAtTime(0, audioCtx.currentTime)
+  }
   return isMuted
 }
 
@@ -128,4 +133,28 @@ export function playWishSavedSound() {
     osc.start(now + i * 0.07)
     osc.stop(now + i * 0.07 + 1.15)
   })
+}
+
+// Shooting Star swoosh sound
+export function playShootingStarSound() {
+  if (isMuted) return
+  const ctx = getAudioContext()
+  if (!ctx) return
+
+  const now = ctx.currentTime
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(1200, now)
+  osc.frequency.exponentialRampToValueAtTime(300, now + 0.5)
+
+  gain.gain.setValueAtTime(0.08, now)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55)
+
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+
+  osc.start(now)
+  osc.stop(now + 0.6)
 }

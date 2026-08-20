@@ -272,12 +272,16 @@ export default function SkyCanvas() {
     }
     window.addEventListener('click', handleCanvasClick)
 
-    function handleMouseMove(e) {
-      targetRawX = e.clientX
-      targetRawY = e.clientY
-      targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2
-      targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2
+    // Meteor Shower Trigger Event
+    function handleMeteorShower() {
+      for (let i = 0; i < 14; i++) {
+        setTimeout(() => {
+          spawnMeteor()
+        }, i * 140 + Math.random() * 60)
+      }
     }
+    window.addEventListener('celestial:meteor_shower', handleMeteorShower)
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
     function drawRipples() {
@@ -548,6 +552,7 @@ export default function SkyCanvas() {
       window.removeEventListener('resize', resize)
       window.removeEventListener('click', handleCanvasClick)
       window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('celestial:meteor_shower', handleMeteorShower)
     }
   }, [])
 
