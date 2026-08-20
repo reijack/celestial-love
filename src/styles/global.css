@@ -376,22 +376,16 @@ nav {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* ═══ REVEAL ANIMATIONS — Multi-directional ═══ */
-.reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.reveal-delay-1.visible { transition-delay: 0.12s; }
-.reveal-delay-2.visible { transition-delay: 0.24s; }
-.reveal-delay-3.visible { transition-delay: 0.36s; }
-.reveal-delay-4.visible { transition-delay: 0.48s; }
-
-.reveal-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-left.visible { opacity: 1; transform: translateX(0); }
-
-.reveal-right { opacity: 0; transform: translateX(40px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-right.visible { opacity: 1; transform: translateX(0); }
-
-.reveal-scale { opacity: 0; transform: scale(0.9); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
-.reveal-scale.visible { opacity: 1; transform: scale(1); }
+/* ═══ REVEAL ANIMATIONS — Safe & Beautiful ═══ */
+.reveal, .reveal-left, .reveal-right, .reveal-scale {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-delay-1 { transition-delay: 0.12s; }
+.reveal-delay-2 { transition-delay: 0.24s; }
+.reveal-delay-3 { transition-delay: 0.36s; }
+.reveal-delay-4 { transition-delay: 0.48s; }
 
 /* ═══ ANIMATION UTILITIES ═══ */
 .twinkle { animation: twinkle 2.4s ease-in-out infinite; }
