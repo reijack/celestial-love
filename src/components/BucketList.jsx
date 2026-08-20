@@ -2,65 +2,23 @@ import { useState, useEffect } from 'react'
 import { spawnHearts } from '../hooks'
 import { playWishSavedSound, playHeartPop, playStarChime } from '../sound'
 
-const INITIAL_BUCKET_LIST = [
-  {
-    id: 'bucket-1',
-    category: 'Petualangan',
-    title: 'Stargazing Berdua di Puncak Bukit',
-    desc: 'Membentangkan tikar di malam hari, melihat gugusan bintang langsung sambil bercerita tentang masa depan.',
-    completed: true,
-    completedDate: 'Tercapai ✦',
-    icon: 'nights_stay',
-  },
-  {
-    id: 'bucket-2',
-    category: 'Kencan Manis',
-    title: 'Masak Resep Baru Berdua di Dapur',
-    desc: 'Eksperimen masak bareng resep masakan favorit, saling mencicipi, dan menikmati makan malam buatan sendiri.',
-    completed: false,
-    icon: 'restaurant',
-  },
-  {
-    id: 'bucket-3',
-    category: 'Perjalanan',
-    title: 'Roadtrip Subuh Mengejar Sunrise di Pantai',
-    desc: 'Berangkat dini hari saat jalanan masih sepi, minum kopi hangat berdua sambil menyambut matahari terbit.',
-    completed: false,
-    icon: 'wb_sunny',
-  },
-  {
-    id: 'bucket-4',
-    category: 'Hiburan',
-    title: 'Nonton Konser Musik Favorit Bareng',
-    desc: 'Bernyanyi sepuasnya bareng ribuan orang sambil saling menggenggam tangan saat lagu kenangan kita dimainkan.',
-    completed: false,
-    icon: 'music_note',
-  },
-  {
-    id: 'bucket-5',
-    category: 'Romantisme',
-    title: 'Piknik Santai di Taman Bunga',
-    desc: 'Menikmati sore yang tenang di taman dengan bekal sandwich, buah segar, dan buku cerita.',
-    completed: false,
-    icon: 'park',
-  },
-  {
-    id: 'bucket-6',
-    category: 'Masa Depan',
-    title: 'Menata Rumah Impian dengan Dekorasi Penuh Cinta',
-    desc: 'Membangun sudut-sudut hangat di tempat tinggal impian kita, merajut kebahagiaan seumur hidup.',
-    completed: false,
-    icon: 'home',
-  },
-]
-
 export default function BucketList() {
   const [items, setItems] = useState(() => {
     try {
       const saved = localStorage.getItem('celestial_bucket_list')
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          const isDummy = parsed.some((i) => i.id === 'bucket-1' && i.title === 'Stargazing Berdua di Puncak Bukit')
+          if (isDummy) {
+            localStorage.removeItem('celestial_bucket_list')
+            return []
+          }
+          return parsed
+        }
+      }
     } catch (_) {}
-    return INITIAL_BUCKET_LIST
+    return []
   })
 
   const [showAddModal, setShowAddModal] = useState(false)
@@ -101,6 +59,14 @@ export default function BucketList() {
     )
   }
 
+  function handleDeleteItem(id, title, e) {
+    e.stopPropagation()
+    setItems((prev) => prev.filter((item) => item.id !== id))
+    playHeartPop()
+    setToastMessage(`Impian "${title}" telah dihapus.`)
+    setTimeout(() => setToastMessage(null), 2500)
+  }
+
   function handleAddItem(e) {
     e.preventDefault()
     if (!newTitle.trim()) return
@@ -111,10 +77,19 @@ export default function BucketList() {
       title: newTitle.trim(),
       desc: newDesc.trim() || 'Petualangan dan mimpi indah yang ingin kita wujudkan bersama di masa depan.',
       completed: false,
-      icon: newCategory === 'Petualangan' ? 'explore' : newCategory === 'Kencan Manis' ? 'favorite' : newCategory === 'Perjalanan' ? 'flight' : 'auto_awesome',
+      icon:
+        newCategory === 'Petualangan'
+          ? 'explore'
+          : newCategory === 'Kencan Manis'
+          ? 'favorite'
+          : newCategory === 'Perjalanan'
+          ? 'flight'
+          : newCategory === 'Hiburan'
+          ? 'music_note'
+          : 'auto_awesome',
     }
 
-    setItems((prev) => [...prev, newItem])
+    setItems((prev) => [newItem, ...prev])
     setNewTitle('')
     setNewDesc('')
     setShowAddModal(false)
@@ -148,127 +123,210 @@ export default function BucketList() {
           className="text-body-lg reveal reveal-delay-2"
           style={{ color: 'var(--on-surface-variant)', maxWidth: '38rem', margin: '0.75rem auto 0' }}
         >
-          Setiap mimpi kecil dan petualangan besar yang ingin kita jelajahi berdua di bawah langit semesta yang sama.
+          Tuliskan setiap mimpi kecil dan petualangan besar yang ingin kita jelajahi berdua di bawah langit semesta yang sama.
         </p>
 
-        {/* Progress Tracker Card */}
-        <div className="bucket-progress-card glass-panel reveal reveal-delay-2">
-          <div className="bucket-progress-header">
-            <div className="bucket-progress-info">
-              <span className="material-symbols-outlined filled heartbeat" style={{ color: 'var(--error)', fontSize: '1.25rem' }}>
-                favorite
-              </span>
-              <div>
-                <div className="bucket-progress-title">Perjalanan Mimpi Bersama</div>
-                <div className="bucket-progress-sub">
-                  <strong>{completedCount}</strong> dari <strong>{totalCount}</strong> impian telah terwujud ({progressPercent}%)
+        {/* Progress Tracker Card (shown when items exist) */}
+        {totalCount > 0 && (
+          <div className="bucket-progress-card glass-panel reveal reveal-delay-2">
+            <div className="bucket-progress-header">
+              <div className="bucket-progress-info">
+                <span className="material-symbols-outlined filled heartbeat" style={{ color: 'var(--error)', fontSize: '1.25rem' }}>
+                  favorite
+                </span>
+                <div>
+                  <div className="bucket-progress-title">Perjalanan Mimpi Bersama</div>
+                  <div className="bucket-progress-sub">
+                    <strong>{completedCount}</strong> dari <strong>{totalCount}</strong> impian telah terwujud ({progressPercent}%)
+                  </div>
                 </div>
               </div>
+
+              <button
+                className="btn-celestial"
+                onClick={() => {
+                  setShowAddModal(true)
+                  playStarChime()
+                }}
+                style={{ padding: '0.5rem 1.1rem', fontSize: '0.84rem' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                  add_task
+                </span>
+                <span>Tambah Impian</span>
+              </button>
             </div>
 
+            <div className="bucket-progress-bar-track">
+              <div className="bucket-progress-bar-fill" style={{ width: `${progressPercent}%` }}>
+                <div className="bucket-progress-bar-sparkle" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Chips (shown when items exist) */}
+        {totalCount > 0 && (
+          <div className="bucket-filter-row reveal reveal-delay-3">
             <button
-              className="btn-celestial"
+              className={`bucket-filter-btn ${filterCat === 'all' ? 'active' : ''}`}
               onClick={() => {
-                setShowAddModal(true)
-                playStarChime()
+                setFilterCat('all')
+                playHeartPop()
               }}
-              style={{ padding: '0.5rem 1.1rem', fontSize: '0.84rem' }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
-                add_task
-              </span>
-              <span>Tambah Impian</span>
+              Semua ({items.length})
+            </button>
+            <button
+              className={`bucket-filter-btn ${filterCat === 'completed' ? 'active' : ''}`}
+              onClick={() => {
+                setFilterCat('completed')
+                playHeartPop()
+              }}
+            >
+              ✨ Telah Terwujud ({completedCount})
+            </button>
+            <button
+              className={`bucket-filter-btn ${filterCat === 'pending' ? 'active' : ''}`}
+              onClick={() => {
+                setFilterCat('pending')
+                playHeartPop()
+              }}
+            >
+              🌙 Menanti Dijelajahi ({totalCount - completedCount})
             </button>
           </div>
+        )}
+      </div>
 
-          <div className="bucket-progress-bar-track">
-            <div className="bucket-progress-bar-fill" style={{ width: `${progressPercent}%` }}>
-              <div className="bucket-progress-bar-sparkle" />
-            </div>
+      {/* Empty State Banner (Clean & Inviting) */}
+      {totalCount === 0 ? (
+        <div
+          className="glass-panel reveal reveal-delay-2"
+          style={{
+            marginTop: '2.5rem',
+            padding: '3.5rem 2rem',
+            textAlign: 'center',
+            borderRadius: '1.75rem',
+            border: '1px dashed rgba(227, 184, 234, 0.35)',
+            maxWidth: '36rem',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          <div
+            style={{
+              width: '4rem',
+              height: '4rem',
+              borderRadius: '50%',
+              background: 'rgba(227, 184, 234, 0.12)',
+              border: '1px solid rgba(227, 184, 234, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.25rem',
+            }}
+            className="floating-element"
+          >
+            <span className="material-symbols-outlined filled twinkle" style={{ fontSize: '2rem', color: 'var(--secondary)' }}>
+              auto_awesome
+            </span>
           </div>
-        </div>
 
-        {/* Filter Chips */}
-        <div className="bucket-filter-row reveal reveal-delay-3">
+          <h3 className="gradient-text" style={{ fontSize: '1.35rem', margin: '0 0 0.5rem' }}>
+            Bucket List Masih Kosong
+          </h3>
+          <p style={{ fontSize: '0.88rem', color: 'var(--on-surface-variant)', lineHeight: 1.6, margin: '0 0 1.75rem' }}>
+            Belum ada impian yang dicatat. Mulai isi daftar petualangan, kencan manis, dan cita-cita yang ingin kita wujudkan bersama!
+          </p>
+
           <button
-            className={`bucket-filter-btn ${filterCat === 'all' ? 'active' : ''}`}
+            className="btn-celestial"
             onClick={() => {
-              setFilterCat('all')
-              playHeartPop()
+              setShowAddModal(true)
+              playStarChime()
             }}
+            style={{ padding: '0.75rem 1.6rem', fontSize: '0.9rem' }}
           >
-            Semua ({items.length})
-          </button>
-          <button
-            className={`bucket-filter-btn ${filterCat === 'completed' ? 'active' : ''}`}
-            onClick={() => {
-              setFilterCat('completed')
-              playHeartPop()
-            }}
-          >
-            ✨ Telah Terwujud ({completedCount})
-          </button>
-          <button
-            className={`bucket-filter-btn ${filterCat === 'pending' ? 'active' : ''}`}
-            onClick={() => {
-              setFilterCat('pending')
-              playHeartPop()
-            }}
-          >
-            🌙 Menanti Dijelajahi ({totalCount - completedCount})
+            <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
+              add_task
+            </span>
+            <span>Tambah Impian Pertama Kita ✦</span>
           </button>
         </div>
-      </div>
+      ) : (
+        /* Bucket List Items Grid */
+        <div className="bucket-grid">
+          {filteredItems.map((item, idx) => {
+            const delayClass = idx % 3 === 0 ? '' : idx % 3 === 1 ? 'reveal-delay-1' : 'reveal-delay-2'
 
-      {/* Bucket List Items Grid */}
-      <div className="bucket-grid">
-        {filteredItems.map((item, idx) => {
-          const delayClass = idx % 3 === 0 ? '' : idx % 3 === 1 ? 'reveal-delay-1' : 'reveal-delay-2'
+            return (
+              <div
+                key={item.id}
+                className={`bucket-card glass-panel reveal ${delayClass} ${item.completed ? 'completed' : ''}`}
+                onClick={(e) => toggleComplete(item.id, item.title, e)}
+                title="Klik kartu untuk menandai impian ini selesai"
+              >
+                <div className="bucket-card-top">
+                  <span className="bucket-category-tag">{item.category}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <button
+                      className="bucket-delete-btn"
+                      onClick={(e) => handleDeleteItem(item.id, item.title, e)}
+                      title="Hapus impian ini"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--on-surface-variant)',
+                        cursor: 'pointer',
+                        opacity: 0.6,
+                        display: 'flex',
+                        padding: '0.2rem',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>
+                        delete_outline
+                      </span>
+                    </button>
 
-          return (
-            <div
-              key={item.id}
-              className={`bucket-card glass-panel reveal ${delayClass} ${item.completed ? 'completed' : ''}`}
-              onClick={(e) => toggleComplete(item.id, item.title, e)}
-              title="Klik untuk menandai impian ini"
-            >
-              <div className="bucket-card-top">
-                <span className="bucket-category-tag">{item.category}</span>
-                <button
-                  className={`bucket-check-btn ${item.completed ? 'checked' : ''}`}
-                  onClick={(e) => toggleComplete(item.id, item.title, e)}
-                  aria-label="Tandai selesai"
-                >
-                  <span className="material-symbols-outlined filled">
-                    {item.completed ? 'check_circle' : 'radio_button_unchecked'}
-                  </span>
-                </button>
+                    <button
+                      className={`bucket-check-btn ${item.completed ? 'checked' : ''}`}
+                      onClick={(e) => toggleComplete(item.id, item.title, e)}
+                      aria-label="Tandai selesai"
+                    >
+                      <span className="material-symbols-outlined filled">
+                        {item.completed ? 'check_circle' : 'radio_button_unchecked'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bucket-card-body">
+                  <div className="bucket-icon-box">
+                    <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                      {item.icon || 'auto_awesome'}
+                    </span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 className="bucket-card-title">{item.title}</h3>
+                    <p className="bucket-card-desc">{item.desc}</p>
+                  </div>
+                </div>
+
+                {item.completed && (
+                  <div className="bucket-completed-badge">
+                    <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem' }}>
+                      stars
+                    </span>
+                    <span>Mimpi Terwujud ✦</span>
+                  </div>
+                )}
               </div>
-
-              <div className="bucket-card-body">
-                <div className="bucket-icon-box">
-                  <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
-                    {item.icon || 'auto_awesome'}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="bucket-card-title">{item.title}</h3>
-                  <p className="bucket-card-desc">{item.desc}</p>
-                </div>
-              </div>
-
-              {item.completed && (
-                <div className="bucket-completed-badge">
-                  <span className="material-symbols-outlined filled" style={{ fontSize: '0.85rem' }}>
-                    stars
-                  </span>
-                  <span>Mimpi Terwujud ✦</span>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Add New Dream Modal */}
       <div
