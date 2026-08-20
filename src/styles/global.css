@@ -92,13 +92,13 @@ body::before {
   100% { opacity: 0.95; transform: scale3d(1.08, 1.08, 1) translate3d(0.8%, -0.6%, 0); }
 }
 
-/* Page entrance animation */
+/* Page entrance animation - Pure opacity to never break position:fixed containing blocks */
 #root {
-  animation: page-enter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-enter 0.8s ease-out forwards;
 }
 @keyframes page-enter {
-  0% { opacity: 0; transform: scale(0.98); filter: blur(4px); }
-  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* ── Scroll Progress Bar ── */
@@ -107,7 +107,7 @@ body::before {
   top: 0;
   left: 0;
   height: 3px;
-  z-index: 1000;
+  z-index: 300;
   background: linear-gradient(90deg, var(--secondary), var(--primary), var(--tertiary), var(--accent-warm));
   background-size: 300% 100%;
   animation: progress-shimmer 3s linear infinite;
@@ -1092,13 +1092,14 @@ section { max-width: 1100px; margin: 0 auto; padding: 7rem 1.5rem 3.5rem; }
 .sw-btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ═══ MUSIC PLAYER ═══ */
-.music-player { position: fixed; bottom: 5rem; right: 1.5rem; z-index: 90; }
-@media (max-width: 860px) { .music-player { bottom: 5.5rem; } }
+.music-player { position: fixed; bottom: 2rem; right: 2rem; z-index: 150; }
+@media (max-width: 860px) { .music-player { bottom: 5.25rem; right: 1.25rem; } }
 .music-btn {
-  width: 3.5rem; height: 3.5rem; border-radius: 50%; border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(20,19,28,0.85); backdrop-filter: blur(16px); color: var(--secondary);
+  width: 3.5rem; height: 3.5rem; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(20,19,28,0.88); backdrop-filter: blur(20px); color: var(--secondary);
   display: flex; align-items: center; justify-content: center; cursor: pointer;
-  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.6); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.6), 0 0 15px rgba(227,184,234,0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .music-btn:hover, .music-btn.active {
   transform: scale(1.1); border-color: rgba(227,184,234,0.4);
@@ -1211,14 +1212,17 @@ footer::before {
 
 /* ═══ QR LOVE ═══ */
 .qr-love-btn {
-  position: fixed; bottom: 5rem; left: 1.5rem; z-index: 90;
-  width: 3.5rem; height: 3.5rem; border-radius: 50%; border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(20,19,28,0.85); backdrop-filter: blur(16px); color: var(--secondary);
+  position: fixed; bottom: 2rem; left: 2rem; z-index: 150;
+  width: 3.5rem; height: 3.5rem; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(20,19,28,0.88); backdrop-filter: blur(20px); color: var(--secondary);
   display: flex; align-items: center; justify-content: center; cursor: pointer;
-  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.6); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.6), 0 0 15px rgba(227,184,234,0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.qr-love-btn:hover { transform: translateY(-3px) scale(1.1); border-color: rgba(227,184,234,0.4); box-shadow: 0 0 24px rgba(227,184,234,0.3); }
-@media (max-width: 860px) { .qr-love-btn { bottom: 5.5rem; } }
+.qr-love-btn:hover { transform: translateY(-3px) scale(1.08); border-color: rgba(227,184,234,0.4); box-shadow: 0 0 24px rgba(227,184,234,0.3); }
+@media (max-width: 860px) {
+  .qr-love-btn { bottom: 5.25rem; left: 1.25rem; width: 3.25rem; height: 3.25rem; }
+}
 .qr-love-modal { padding-top: 2.5rem; }
 .qr-love-canvas-wrap { display: flex; justify-content: center; margin-bottom: 1.5rem; }
 .qr-love-canvas-wrap canvas {
